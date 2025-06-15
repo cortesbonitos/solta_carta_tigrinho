@@ -55,10 +55,16 @@ class _TesteEventosPageState extends State<TesteEventosPage> {
         builder: (_) => MenuDetalhesEvento(
           titulo: evento.titulo,
           descricao: evento.descricao,
-          preco: preco,
+          preco: evento.preco,
+          nomeOrador: evento.nomeOrador,
+          dataInicio: evento.dataInicio,
+          dataFim: evento.dataFim,
+          mediaAvaliacoes: evento.mediaAvaliacoes,
+          limiteInscricoes: evento.limiteInscricoes,
         ),
       ),
     );
+
   }
 
   Widget _construirSecao(String titulo, List<Evento> eventos, double precoFixo) {

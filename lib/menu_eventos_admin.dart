@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
-import 'menu_editar_evento.dart';
 import 'menu_criar_evento.dart';
+import 'menu_detalhes_evento_admin.dart';
 
 class MenuEventosAdmin extends StatefulWidget {
   const MenuEventosAdmin({super.key});
@@ -40,27 +40,33 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
     }
   }
 
-  void _editarEvento(BuildContext context, Evento evento) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => MenuEditarEvento(
-          idEvento: evento.idEvento,
-          titulo: evento.titulo,
-          descricao: evento.descricao,
-          preco: evento.preco,
-        ),
-      ),
-    );
-  }
-
   void _criarEvento(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => const MenuCriarEvento(),
       ),
-    );
+    ).then((_) => _carregarEventos());
+  }
+
+  void _irParaDetalhes(BuildContext context, Evento evento) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MenuDetalhesEventoAdmin(
+          idEvento: evento.idEvento,
+          titulo: evento.titulo,
+          descricao: evento.descricao,
+          preco: evento.preco,
+          dataInicio: evento.dataInicio.toIso8601String(),
+          dataFim: evento.dataFim.toIso8601String(),
+          mediaAvaliacoes: evento.mediaAvaliacoes,
+          limiteInscricoes: evento.limiteInscricoes,
+          idCategoria: evento.idCategoria,
+          nomeOrador: evento.nomeOrador,
+        ),
+      ),
+    ).then((_) => _carregarEventos());
   }
 
   @override
@@ -69,6 +75,10 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
       appBar: AppBar(
         title: const Text('Eventos (Admin)'),
         backgroundColor: verdeEscuro,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       backgroundColor: Colors.white,
       body: _isLoading
@@ -81,46 +91,44 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
         itemBuilder: (context, index) {
           final evento = _eventos[index];
 
-          return Container(
-            margin: const EdgeInsets.only(bottom: 20),
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: verdeClaro,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Icon(Icons.event, color: Colors.black),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Text(
-                        evento.titulo,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+          return GestureDetector(
+            onTap: () => _irParaDetalhes(context, evento),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: verdeClaro,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.event, color: Colors.black),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          evento.titulo,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.edit, color: verdeEscuro),
-                      onPressed: () => _editarEvento(context, evento),
-                      tooltip: 'Editar',
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Text(evento.descricao),
-                const SizedBox(height: 8),
-                Text(
-                  evento.preco == 0
-                      ? 'Grátis'
-                      : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
-                  style: const TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ],
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(evento.descricao),
+                  const SizedBox(height: 8),
+                  Text(
+                    evento.preco == 0
+                        ? 'Grátis'
+                        : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
+                    style: const TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
             ),
           );
         },

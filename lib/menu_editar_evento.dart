@@ -41,7 +41,18 @@ class _MenuEditarEventoState extends State<MenuEditarEvento> {
     final titulo = tituloController.text.trim();
     final descricao = descricaoController.text.trim();
     final precoTexto = precoController.text.trim();
-    final double preco = double.tryParse(precoTexto) ?? 0.0;
+
+    // Validação
+    if (precoTexto.isEmpty || double.tryParse(precoTexto) == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Insere um preço válido.')),
+      );
+      return;
+    }
+
+    final double preco = double.parse(precoTexto);
+
+    print('Preço enviado: $preco');
 
     final eventoAtualizado = Evento(
       idEvento: widget.idEvento,

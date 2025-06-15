@@ -6,12 +6,22 @@ class MenuDetalhesEvento extends StatelessWidget {
   final String titulo;
   final String descricao;
   final double preco;
+  final String nomeOrador;
+  final DateTime dataInicio;
+  final DateTime dataFim;
+  final double mediaAvaliacoes;
+  final int? limiteInscricoes;
 
   const MenuDetalhesEvento({
     super.key,
     required this.titulo,
     required this.descricao,
     required this.preco,
+    required this.nomeOrador,
+    required this.dataInicio,
+    required this.dataFim,
+    required this.mediaAvaliacoes,
+    required this.limiteInscricoes,
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -63,6 +73,10 @@ class MenuDetalhesEvento extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final String dataFormatada =
+        '${dataInicio.day}/${dataInicio.month}/${dataInicio.year} ${dataInicio.hour}:${dataInicio.minute.toString().padLeft(2, '0')} - '
+        '${dataFim.hour}:${dataFim.minute.toString().padLeft(2, '0')}';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalhes do Evento'),
@@ -71,7 +85,7 @@ class MenuDetalhesEvento extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Center(
         child: Container(
-          width: 320,
+          width: 340,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: verdeClaro,
@@ -87,6 +101,16 @@ class MenuDetalhesEvento extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(descricao),
+              const SizedBox(height: 12),
+              Text('Orador: $nomeOrador'),
+              const SizedBox(height: 8),
+              Text('Data: $dataFormatada'),
+              const SizedBox(height: 8),
+              Text('Média de avaliações: ${mediaAvaliacoes.toStringAsFixed(1)} ⭐'),
+              const SizedBox(height: 8),
+              Text(limiteInscricoes != null
+                  ? 'Limite de inscrições: $limiteInscricoes'
+                  : 'Sem limite de inscrições'),
               const SizedBox(height: 12),
               Text(
                 preco == 0 ? 'Evento Grátis' : 'Preço: ${preco.toStringAsFixed(2)} €',

@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'menu_login.dart';
 import 'menu_inicial.dart';
 
@@ -10,17 +12,29 @@ class MenuRegisto extends StatefulWidget {
 }
 
 class _MenuRegistoState extends State<MenuRegisto> {
+  final TextEditingController nomeController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final TextEditingController confirmarPasswordController = TextEditingController();
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
+  final String apiUrl = 'https://ipcaeventos-cmh2evayfvghhce9.spaincentral-01.azurewebsites.net/api/utilizador';
 
-  void _registar() {
-    final email = emailController.text;
-    final password = passwordController.text;
-    final confirmarPassword = confirmarPasswordController.text;
+  bool _isLoading = false;
+
+  Future<void> _registar() async {
+    final nome = nomeController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+    final confirmarPassword = confirmarPasswordController.text.trim();
+
+    if (nome.isEmpty || email.isEmpty || password.isEmpty || confirmarPassword.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preenche todos os campos.')),
+      );
+      return;
+    }
 
     if (password != confirmarPassword) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -29,14 +43,44 @@ class _MenuRegistoState extends State<MenuRegisto> {
       return;
     }
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Registo efetuado com sucesso.')),
-    );
+    setState(() => _isLoading = true);
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (_) => const MenuLogin()),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'nome': nome,
+          'email': email,
+          'palavra_passe': password,
+        }),
+      );
+
+      setState(() => _isLoading = false);
+
+      if (response.statusCode == 201) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registo efetuado com sucesso.')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const MenuLogin()),
+        );
+      } else if (response.statusCode == 409) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Este email já está em uso.')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao registar: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro de ligação ao servidor.')),
+      );
+    }
   }
 
   void _voltarParaInicial() {
@@ -87,18 +131,18 @@ class _MenuRegistoState extends State<MenuRegisto> {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Text('Nome'),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: nomeController,
+                      decoration: _inputDecoration(),
+                    ),
+                    const SizedBox(height: 16),
                     const Text('Email'),
                     const SizedBox(height: 8),
                     TextField(
                       controller: emailController,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      decoration: _inputDecoration(),
                     ),
                     const SizedBox(height: 16),
                     const Text('Palavra passe'),
@@ -106,14 +150,7 @@ class _MenuRegistoState extends State<MenuRegisto> {
                     TextField(
                       controller: passwordController,
                       obscureText: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      decoration: _inputDecoration(),
                     ),
                     const SizedBox(height: 16),
                     const Text('Confirmar palavra passe'),
@@ -121,17 +158,12 @@ class _MenuRegistoState extends State<MenuRegisto> {
                     TextField(
                       controller: confirmarPasswordController,
                       obscureText: true,
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
+                      decoration: _inputDecoration(),
                     ),
                     const SizedBox(height: 24),
-                    ElevatedButton(
+                    _isLoading
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
                       onPressed: _registar,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: verdeEscuro,
@@ -146,6 +178,17 @@ class _MenuRegistoState extends State<MenuRegisto> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(8),
+        borderSide: BorderSide.none,
       ),
     );
   }
