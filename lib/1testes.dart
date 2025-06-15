@@ -61,11 +61,12 @@ class _TesteEventosPageState extends State<TesteEventosPage> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
+          idEvento: evento.idEvento, // ✅ Linha que faltava
         ),
       ),
     );
-
   }
+
 
   Widget _construirSecao(String titulo, List<Evento> eventos, double precoFixo) {
     if (eventos.isEmpty) return SizedBox.shrink();

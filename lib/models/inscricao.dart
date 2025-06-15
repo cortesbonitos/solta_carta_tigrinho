@@ -1,11 +1,11 @@
 class Inscricao {
-  final int idInscricao;
+   int? idInscricao;
   final int idUtilizador;
   final int idEvento;
-  final String dataInscricao;
+  final DateTime dataInscricao;
 
   Inscricao({
-    required this.idInscricao,
+     this.idInscricao,
     required this.idUtilizador,
     required this.idEvento,
     required this.dataInscricao,
@@ -16,16 +16,20 @@ class Inscricao {
       idInscricao: json['id_inscricao'],
       idUtilizador: json['id_utilizador'],
       idEvento: json['id_evento'],
-      dataInscricao: json['data_inscricao'],
+      dataInscricao: DateTime.parse(json['data_inscricao']),
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id_inscricao': idInscricao,
       'id_utilizador': idUtilizador,
       'id_evento': idEvento,
       'data_inscricao': dataInscricao,
     };
   }
+  @override
+  String toString() {
+    return 'Inscricao{idInscricao: $idInscricao, idUtilizador: $idUtilizador, idEvento: $idEvento, dataInscricao: $dataInscricao}';
+  }
+
 }

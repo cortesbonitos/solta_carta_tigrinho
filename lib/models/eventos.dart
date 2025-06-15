@@ -8,7 +8,7 @@ class Evento {
   final int? limiteInscricoes;
   final int idCategoria;
   final String nomeOrador;
-  final double preco;
+  double preco;
 
   Evento({
     required this.idEvento,

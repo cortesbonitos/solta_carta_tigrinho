@@ -1,46 +1,82 @@
 import 'package:flutter/material.dart';
+import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
+import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
+import 'package:ipca_gestao_eventos/models/eventos.dart';
+import 'package:ipca_gestao_eventos/models/inscricao.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_participante.dart';
 import 'menu_detalhes_meu_evento.dart';
 
-class MenuListaMeusEventos extends StatelessWidget {
+class MenuListaMeusEventos extends StatefulWidget {
   const MenuListaMeusEventos({super.key});
 
+  @override
+  State<MenuListaMeusEventos> createState() => _MenuListaMeusEventosState();
+}
+
+class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
+  final idUtilizador = Utilizador.currentUser!.idUtilizador;
 
-  final List<Map<String, dynamic>> meusEventos = const [
-    {
-      'titulo': 'Evento 1',
-      'descricao': 'Subhead do Evento 1',
-      'preco': 0.0,
-    },
-    {
-      'titulo': 'Evento 2',
-      'descricao': 'Subhead do Evento 2',
-      'preco': 5.0,
-    },
-  ];
+  List<Evento> _eventosInscritos = [];
+  bool _loading = true;
+  String? _erro;
 
-  void _desinscrever(BuildContext context, String titulo) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Cancelou inscrição em "$titulo".')),
-    );
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const MenuParticipante()),
-          (route) => false,
-    );
+  @override
+  void initState() {
+    super.initState();
+    _carregarEventosInscritos();
   }
 
-  void _abrirDetalhes(BuildContext context, Map<String, dynamic> evento) {
+  Future<void> _carregarEventosInscritos() async {
+    try {
+
+      final inscricoes = await InscricoesAPI.getInscricoesPorUser(idUtilizador);
+      final idsEventosInscritos = inscricoes.map((i) => i.idEvento).toList();
+      final eventosListas = await Future.wait(
+        idsEventosInscritos.map((id) => EventosApi.getEventosPorId(id)),
+      );
+
+       _eventosInscritos = eventosListas.expand((e) => e).toList();
+
+
+      setState(() {
+        //_eventosInscritos = apenasMeusEventos;
+        _loading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _erro = e.toString();
+        _loading = false;
+      });
+    }
+  }
+
+  Future<void> _desinscrever(BuildContext context, Evento evento) async {
+    try {
+      InscricoesAPI.eliminarInscricao(evento.idEvento);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Inscrição cancelada com sucesso.')),
+      );
+
+      _carregarEventosInscritos(); // Atualizar a lista
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao desinscrever: $e')),
+      );
+    }
+  }
+
+  void _abrirDetalhes(BuildContext context, Evento evento) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MenuDetalhesMeuEvento(
-          titulo: evento['titulo'],
-          descricao: evento['descricao'],
-          preco: evento['preco'],
+          titulo: evento.titulo,
+          descricao: evento.descricao,
+          preco: evento.preco,
         ),
       ),
     );
@@ -54,11 +90,17 @@ class MenuListaMeusEventos extends StatelessWidget {
         title: const Text('Meus Eventos'),
         backgroundColor: verdeEscuro,
       ),
-      body: ListView.builder(
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : _erro != null
+          ? Center(child: Text('Erro: $_erro'))
+          : _eventosInscritos.isEmpty
+          ? const Center(child: Text('Nenhuma inscrição encontrada.'))
+          : ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: meusEventos.length,
+        itemCount: _eventosInscritos.length,
         itemBuilder: (context, index) {
-          final evento = meusEventos[index];
+          final evento = _eventosInscritos[index];
 
           return GestureDetector(
             onTap: () => _abrirDetalhes(context, evento),
@@ -85,7 +127,7 @@ class MenuListaMeusEventos extends StatelessWidget {
                       const SizedBox(width: 10),
                       Expanded(
                         child: Text(
-                          evento['titulo'],
+                          evento.titulo,
                           style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -95,12 +137,12 @@ class MenuListaMeusEventos extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 8),
-                  Text(evento['descricao']),
+                  Text(evento.descricao),
                   const SizedBox(height: 8),
                   Text(
-                    evento['preco'] == 0
+                    evento.preco == 0
                         ? 'Grátis'
-                        : 'Preço: ${evento['preco'].toStringAsFixed(2)} €',
+                        : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                   const SizedBox(height: 12),
@@ -108,8 +150,7 @@ class MenuListaMeusEventos extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       ElevatedButton(
-                        onPressed: () =>
-                            _desinscrever(context, evento['titulo']),
+                        onPressed: () => _desinscrever(context, evento),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red[700],
                           foregroundColor: Colors.white,
@@ -127,4 +168,3 @@ class MenuListaMeusEventos extends StatelessWidget {
     );
   }
 }
-

@@ -27,6 +27,27 @@ abstract class EventosApi {
     }
   }
 
+  static Future<List<Evento>> getEventosPorId(int idEvento) async {
+    final url = Uri.parse('$_baseUrl/evento/$idEvento');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> responseData = jsonDecode(response.body);
+        return [Evento.fromJson(responseData)];
+      } else {
+        throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erro ao carregar eventos: $e');
+      rethrow;
+    }
+  }
+
   // Atualizar evento existente
   static Future<void> atualizarEvento(Evento evento) async {
     final url = Uri.parse('$_baseUrl/evento/${evento.idEvento}');
@@ -70,4 +91,6 @@ abstract class EventosApi {
       throw Exception('Erro ao eliminar evento: ${response.statusCode}');
     }
   }
+
+
 }

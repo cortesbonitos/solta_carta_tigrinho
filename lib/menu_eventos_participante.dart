@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'menu_detalhes_evento.dart';
+import 'dart:math';
 
 class MenuEventosParticipante extends StatefulWidget {
   const MenuEventosParticipante({super.key});
@@ -27,7 +28,13 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
 
   Future<void> _carregarEventos() async {
     try {
-      final eventos = await EventosApi.getEventos();
+      List<Evento> eventos = await EventosApi.getEventos();
+      final random = Random();
+
+      for (var e in eventos) {
+        e.preco = random.nextDouble() * 50; // valor entre 0 e 50
+      }
+
 
       for (var e in eventos) {
         final preco = 0.0; // ← substituir por e.preco quando existir no model
@@ -62,11 +69,12 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
+          idEvento: evento.idEvento, // ✅ Adiciona esta linha
         ),
       ),
     );
-
   }
+
 
   Widget _construirSecao(String titulo, List<Evento> eventos, double precoFixo) {
     if (eventos.isEmpty) return const SizedBox.shrink();

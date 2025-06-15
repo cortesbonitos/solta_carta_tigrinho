@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
+import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
+import 'data/inscricoesAPI.dart';
 import 'menu_pagamento_metodos.dart';
 import 'menu_logout.dart';
+import 'models/inscricao.dart';
 
 class MenuDetalhesEvento extends StatelessWidget {
   final String titulo;
@@ -11,6 +15,7 @@ class MenuDetalhesEvento extends StatelessWidget {
   final DateTime dataFim;
   final double mediaAvaliacoes;
   final int? limiteInscricoes;
+  final int idEvento;
 
   const MenuDetalhesEvento({
     super.key,
@@ -22,12 +27,22 @@ class MenuDetalhesEvento extends StatelessWidget {
     required this.dataFim,
     required this.mediaAvaliacoes,
     required this.limiteInscricoes,
+    required this.idEvento,
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  void _inscreverOuPagar(BuildContext context) {
+  void _inscreverOuPagar(BuildContext context) async {
+    final idUtilizador = Utilizador.currentUser?.idUtilizador;
+
+    if (idUtilizador == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro: Utilizador não autenticado.')),
+      );
+      return;
+    }
+
     if (preco > 0) {
       // Evento pago
       showDialog(
@@ -59,15 +74,31 @@ class MenuDetalhesEvento extends StatelessWidget {
         ),
       );
     } else {
-      // Evento grátis
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Inscrição feita com sucesso!')),
-      );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const MenuLogout()),
-            (route) => false,
-      );
+      // Evento grátis — fazer inscrição real
+      try {
+        Inscricao novaInscricao = Inscricao(
+          idInscricao: 0,
+          idEvento: idEvento,
+          idUtilizador: idUtilizador,
+          dataInscricao: DateTime.now(),
+        );
+        print(novaInscricao);
+        await InscricoesAPI.criarInscricao(novaInscricao);
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Inscrição feita com sucesso!')),
+        );
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const MenuLogout()),
+              (route) => false,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erro ao inscrever: $e')),
+        );
+      }
     }
   }
 
