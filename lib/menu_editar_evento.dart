@@ -1,38 +1,79 @@
 import 'package:flutter/material.dart';
 import 'menu_eventos_admin.dart';
+import 'package:ipca_gestao_eventos/models/eventos.dart';
+import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 
 class MenuEditarEvento extends StatefulWidget {
-  const MenuEditarEvento({super.key});
+  final int idEvento;
+  final String titulo;
+  final String descricao;
+  final double preco;
+
+  const MenuEditarEvento({
+    super.key,
+    required this.idEvento,
+    required this.titulo,
+    required this.descricao,
+    required this.preco,
+  });
 
   @override
   State<MenuEditarEvento> createState() => _MenuEditarEventoState();
 }
 
 class _MenuEditarEventoState extends State<MenuEditarEvento> {
-  final TextEditingController tituloController = TextEditingController(text: 'Evento Exemplo');
-  final TextEditingController descricaoController = TextEditingController(text: 'Descrição do evento');
-  final TextEditingController precoController = TextEditingController(text: '10.0');
+  late TextEditingController tituloController;
+  late TextEditingController descricaoController;
+  late TextEditingController precoController;
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  void _guardarAlteracoes() {
+  @override
+  void initState() {
+    super.initState();
+    tituloController = TextEditingController(text: widget.titulo);
+    descricaoController = TextEditingController(text: widget.descricao);
+    precoController = TextEditingController(text: widget.preco.toStringAsFixed(2));
+  }
+
+  void _guardarAlteracoes() async {
     final titulo = tituloController.text.trim();
     final descricao = descricaoController.text.trim();
     final precoTexto = precoController.text.trim();
+    final double preco = double.tryParse(precoTexto) ?? 0.0;
 
-    double preco = double.tryParse(precoTexto) ?? 0.0;
-
-    // Aqui poderias enviar os dados atualizados para a API ou base de dados
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Evento atualizado com sucesso!')),
+    final eventoAtualizado = Evento(
+      idEvento: widget.idEvento,
+      titulo: titulo,
+      descricao: descricao,
+      dataInicio: DateTime(2025, 6, 25, 10, 0),
+      dataFim: DateTime(2025, 6, 25, 12, 0),
+      mediaAvaliacoes: 5.0,
+      limiteInscricoes: null,
+      idCategoria: 2,
+      nomeOrador: "Prof. Ana Marques",
+      preco: preco,
     );
 
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) =>  MenuEventosAdmin()),
-    );
+    try {
+      await EventosApi.atualizarEvento(eventoAtualizado);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Evento atualizado com sucesso!')),
+      );
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MenuEventosAdmin()),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro ao atualizar evento: $e')),
+      );
+    }
   }
 
   @override

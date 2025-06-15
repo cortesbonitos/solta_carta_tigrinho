@@ -3,7 +3,7 @@ import 'dart:convert';
 
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
 
-abstract class UserAPI {
+abstract class UtilizadorAPI {
   static Future<bool> login(String email, String password) async {
     final url = Uri.parse('localhost');
     // Simulate a network call

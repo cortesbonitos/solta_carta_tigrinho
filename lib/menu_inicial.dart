@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'menu_login.dart';
 import 'menu_registo.dart';
+import '1testes.dart'; // nome correto do ficheiro de testes
 
 class MenuInicial extends StatelessWidget {
   const MenuInicial({super.key});
@@ -83,6 +84,27 @@ class MenuInicial extends StatelessWidget {
                       child: const Text('Registo'),
                     ),
                   ],
+                ),
+              ),
+            ),
+          ),
+
+          // BOTÃO DE TESTE EM BAIXO
+          Padding(
+            padding: const EdgeInsets.only(bottom: 24),
+            child: TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => TesteEventosPage()), // classe dentro do ficheiro 1testes.dart
+                );
+              },
+              child: const Text(
+                '🛠 Testar API',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  decoration: TextDecoration.underline,
                 ),
               ),
             ),

@@ -3,6 +3,7 @@ import 'menu_participante.dart';
 import 'menu_admin.dart';
 import 'menu_mudar_palavrapasse.dart';
 import 'menu_inicial.dart';
+import 'models/eventos.dart';
 
 class MenuLogin extends StatefulWidget {
   const MenuLogin({super.key});
@@ -21,6 +22,7 @@ class _MenuLoginState extends State<MenuLogin> {
   void _login() {
     String email = emailController.text;
     String password = passwordController.text;
+
 
     if (email == 'admin' && password == 'admin') {
       Navigator.pushReplacement(
