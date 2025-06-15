@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'menu_eventos_admin.dart';
 
 class MenuEditarEvento extends StatefulWidget {
   const MenuEditarEvento({super.key});
@@ -8,25 +9,43 @@ class MenuEditarEvento extends StatefulWidget {
 }
 
 class _MenuEditarEventoState extends State<MenuEditarEvento> {
-  final TextEditingController nomeController = TextEditingController(text: 'Evento 1');
-  final TextEditingController descricaoController = TextEditingController(text: 'Subhead');
-  final TextEditingController dataController = TextEditingController(text: '10/06/2025');
-  final TextEditingController horaController = TextEditingController(text: '20:00');
+  final TextEditingController tituloController = TextEditingController(text: 'Evento Exemplo');
+  final TextEditingController descricaoController = TextEditingController(text: 'Descrição do evento');
+  final TextEditingController precoController = TextEditingController(text: '10.0');
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
+  void _guardarAlteracoes() {
+    final titulo = tituloController.text.trim();
+    final descricao = descricaoController.text.trim();
+    final precoTexto = precoController.text.trim();
+
+    double preco = double.tryParse(precoTexto) ?? 0.0;
+
+    // Aqui poderias enviar os dados atualizados para a API ou base de dados
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Evento atualizado com sucesso!')),
+    );
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) =>  MenuEventosAdmin()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Editar Evento'),
         backgroundColor: verdeEscuro,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.white,
+      body: Center(
         child: Container(
+          width: 320,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: verdeClaro,
@@ -34,92 +53,61 @@ class _MenuEditarEventoState extends State<MenuEditarEvento> {
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.shade300,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
             ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Nome do Evento', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const Text('Título do Evento'),
               const SizedBox(height: 8),
               TextField(
-                controller: nomeController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                controller: tituloController,
+                decoration: _inputDecoration(),
               ),
-              const SizedBox(height: 20),
-              const Text('Descrição', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 16),
+              const Text('Descrição'),
               const SizedBox(height: 8),
               TextField(
                 controller: descricaoController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                maxLines: 3,
+                decoration: _inputDecoration(),
               ),
-              const SizedBox(height: 20),
-              const Text('Data (dd/mm/aaaa)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 16),
+              const Text('Preço (€)'),
               const SizedBox(height: 8),
               TextField(
-                controller: dataController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'dd/mm/aaaa',
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                controller: precoController,
+                keyboardType: TextInputType.number,
+                decoration: _inputDecoration().copyWith(hintText: '0 para evento grátis'),
               ),
-              const SizedBox(height: 20),
-              const Text('Horário (hh:mm)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: horaController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'hh:mm',
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _guardarAlteracoes,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: verdeEscuro,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: verdeEscuro,
-                      side: const BorderSide(color: verdeEscuro),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Alterações guardadas!')),
-                      );
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: verdeEscuro,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: const Text('Guardar'),
-                  ),
-                ],
+                child: const Text('Guardar Alterações'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(8),
       ),
     );
   }

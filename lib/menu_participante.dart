@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'menu_login.dart';
 import 'menu_eventos_participante.dart';
 import 'menu_lista_meus_eventos.dart';
+import 'menu_participante.dart';
+
 
 class MenuParticipante extends StatelessWidget {
   const MenuParticipante({super.key});

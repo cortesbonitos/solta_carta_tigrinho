@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'menu_logout.dart';
+import 'menu_eventos_admin.dart';
 
 class MenuCriarEvento extends StatefulWidget {
   const MenuCriarEvento({super.key});
@@ -9,33 +9,43 @@ class MenuCriarEvento extends StatefulWidget {
 }
 
 class _MenuCriarEventoState extends State<MenuCriarEvento> {
-  final TextEditingController nomeController = TextEditingController();
+  final TextEditingController tituloController = TextEditingController();
   final TextEditingController descricaoController = TextEditingController();
-  final TextEditingController dataController = TextEditingController();
-  final TextEditingController horaController = TextEditingController();
+  final TextEditingController precoController = TextEditingController();
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
   void _criarEvento() {
-    // Aqui normalmente salvarias os dados
-    Navigator.push(
+    final titulo = tituloController.text.trim();
+    final descricao = descricaoController.text.trim();
+    final precoTexto = precoController.text.trim();
+
+    double preco = double.tryParse(precoTexto) ?? 0.0;
+
+    // Aqui poderias enviar para a API ou armazenar na lista de eventos
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Evento criado com sucesso!')),
+    );
+
+    Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const MenuLogout()),
+      MaterialPageRoute(builder: (context) =>  MenuEventosAdmin()),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Criar Evento'),
         backgroundColor: verdeEscuro,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
+      backgroundColor: Colors.white,
+      body: Center(
         child: Container(
+          width: 320,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: verdeClaro,
@@ -43,88 +53,61 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
             boxShadow: [
               BoxShadow(
                 color: Colors.grey.shade300,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              )
+                blurRadius: 6,
+                offset: const Offset(0, 3),
+              ),
             ],
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text('Nome do Evento', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const Text('Título do Evento'),
               const SizedBox(height: 8),
               TextField(
-                controller: nomeController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                controller: tituloController,
+                decoration: _inputDecoration(),
               ),
-              const SizedBox(height: 20),
-              const Text('Descrição', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 16),
+              const Text('Descrição'),
               const SizedBox(height: 8),
               TextField(
                 controller: descricaoController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                maxLines: 3,
+                decoration: _inputDecoration(),
               ),
-              const SizedBox(height: 20),
-              const Text('Data (dd/mm/aaaa)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+              const SizedBox(height: 16),
+              const Text('Preço (€)'),
               const SizedBox(height: 8),
               TextField(
-                controller: dataController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'dd/mm/aaaa',
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
-                ),
+                controller: precoController,
+                keyboardType: TextInputType.number,
+                decoration: _inputDecoration().copyWith(hintText: '0 para evento grátis'),
               ),
-              const SizedBox(height: 20),
-              const Text('Horário (hh:mm)', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
-              const SizedBox(height: 8),
-              TextField(
-                controller: horaController,
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: Colors.white,
-                  hintText: 'hh:mm',
-                  border: OutlineInputBorder(borderSide: BorderSide.none, borderRadius: BorderRadius.circular(8)),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: _criarEvento,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: verdeEscuro,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-              ),
-              const SizedBox(height: 30),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: verdeEscuro,
-                      side: const BorderSide(color: verdeEscuro),
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: const Text('Cancelar'),
-                  ),
-                  ElevatedButton(
-                    onPressed: _criarEvento,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: verdeEscuro,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                    ),
-                    child: const Text('Criar'),
-                  ),
-                ],
+                child: const Text('Criar Evento'),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration() {
+    return InputDecoration(
+      filled: true,
+      fillColor: Colors.white,
+      border: OutlineInputBorder(
+        borderSide: BorderSide.none,
+        borderRadius: BorderRadius.circular(8),
       ),
     );
   }

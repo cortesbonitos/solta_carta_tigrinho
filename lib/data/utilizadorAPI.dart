@@ -5,7 +5,7 @@ import 'package:ipca_gestao_eventos/models/utilizador.dart';
 
 abstract class UserAPI {
   static Future<bool> login(String email, String password) async {
-    final url = Uri.parse('??????');
+    final url = Uri.parse('localhost');
     // Simulate a network call
     final response = await http.post(
       url,

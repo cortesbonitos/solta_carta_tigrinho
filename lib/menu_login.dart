@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'menu_participante.dart';
 import 'menu_admin.dart';
 import 'menu_mudar_palavrapasse.dart';
+import 'menu_inicial.dart';
 
 class MenuLogin extends StatefulWidget {
   const MenuLogin({super.key});
@@ -44,15 +45,27 @@ class _MenuLoginState extends State<MenuLogin> {
             height: 100,
             width: double.infinity,
             color: verdeEscuro,
-            alignment: Alignment.centerLeft,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: const Text(
-              'Login',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const MenuInicial()),
+                    );
+                  },
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'Login',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(
@@ -112,7 +125,8 @@ class _MenuLoginState extends State<MenuLogin> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const MenuMudarPalavraPasse(),
+                            builder: (context) =>
+                            const MenuMudarPalavraPasse(),
                           ),
                         );
                       },

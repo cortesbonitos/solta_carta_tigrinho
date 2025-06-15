@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'menu_logout.dart';
-import 'menu_pagamento.dart';
 import 'menu_detalhes_evento.dart';
 
 class MenuEventosParticipante extends StatelessWidget {
@@ -9,106 +7,87 @@ class MenuEventosParticipante extends StatelessWidget {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
+  final List<Map<String, dynamic>> eventos = const [
+    {
+      'titulo': 'Evento Grátis 1',
+      'descricao': 'Descrição do evento grátis 1',
+      'preco': 0.0,
+    },
+    {
+      'titulo': 'Evento Grátis 2',
+      'descricao': 'Descrição do evento grátis 2',
+      'preco': 0.0,
+    },
+    {
+      'titulo': 'Evento Pago 1',
+      'descricao': 'Descrição do evento pago',
+      'preco': 10.0,
+    },
+  ];
+
+  void _irParaDetalhes(BuildContext context, Map<String, dynamic> evento) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MenuDetalhesEvento(
+          titulo: evento['titulo'],
+          descricao: evento['descricao'],
+          preco: evento['preco'],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final eventos = [
-      {
-        'titulo': 'Evento 1',
-        'sub': 'Subhead',
-        'pago': false,
-        'descricao': 'Um evento gratuito com várias atividades.',
-        'data': '12/06/2025',
-        'hora': '15:00',
-        'local': 'Auditório 1'
-      },
-      {
-        'titulo': 'Evento 2',
-        'sub': 'Subhead',
-        'pago': false,
-        'descricao': 'Sessão interativa com convidados.',
-        'data': '14/06/2025',
-        'hora': '10:30',
-        'local': 'Sala 5'
-      },
-      {
-        'titulo': 'Evento 3',
-        'sub': 'Subhead',
-        'pago': true,
-        'descricao': 'Workshop especial com material incluído.',
-        'data': '20/06/2025',
-        'hora': '09:00',
-        'local': 'Centro de Convenções'
-      },
-    ];
-
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Eventos Disponíveis'),
+        title: const Text('Eventos'),
         backgroundColor: verdeEscuro,
       ),
+      backgroundColor: Colors.white,
       body: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: eventos.length,
         itemBuilder: (context, index) {
           final evento = eventos[index];
-
           return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MenuDetalhesEvento(
-                    titulo: evento['titulo'] as String,
-                    descricao: evento['descricao'] as String,
-                    data: evento['data'] as String,
-                    hora: evento['hora'] as String,
-                    local: evento['local'] as String,
-                  ),
-                ),
-              );
-            },
+            onTap: () => _irParaDetalhes(context, evento),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
+              margin: const EdgeInsets.only(bottom: 20),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: verdeClaro,
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.event, color: Colors.black),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          evento['titulo'],
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(evento['descricao']),
+                  const SizedBox(height: 8),
+                  Text(
+                    evento['preco'] == 0
+                        ? 'Grátis'
+                        : 'Preço: ${evento['preco'].toStringAsFixed(2)} €',
+                    style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                 ],
-              ),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                leading: CircleAvatar(
-                  backgroundColor: verdeEscuro,
-                  child: const Text('A', style: TextStyle(color: Colors.white)),
-                ),
-                title: Text(evento['titulo'] as String),
-                subtitle: Text(evento['sub'] as String),
-                trailing: ElevatedButton(
-                  onPressed: () {
-                    if (evento['pago'] == true) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MenuPagamento()),
-                      );
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const MenuLogout()),
-                      );
-                    }
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: verdeEscuro,
-                    foregroundColor: Colors.white,
-                  ),
-                  child: const Text('Inscrever-se'),
-                ),
               ),
             ),
           );

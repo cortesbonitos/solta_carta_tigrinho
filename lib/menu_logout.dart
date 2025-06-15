@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'menu_login.dart';
+import 'menu_participante.dart';
 
 class MenuLogout extends StatelessWidget {
   const MenuLogout({super.key});
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
+  static const Color verdeClaro = Color(0xFFA8D4BA);
 
   @override
   Widget build(BuildContext context) {
@@ -12,9 +14,8 @@ class MenuLogout extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // BARRA VERDE
           Container(
-            height: 80,
+            height: 100,
             width: double.infinity,
             color: verdeEscuro,
             alignment: Alignment.centerLeft,
@@ -23,21 +24,18 @@ class MenuLogout extends StatelessWidget {
               'Logout',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 22,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
-
-          // MENSAGEM CENTRAL
           Expanded(
             child: Center(
               child: Container(
+                width: 320,
                 padding: const EdgeInsets.all(24),
-                margin: const EdgeInsets.symmetric(horizontal: 24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: verdeEscuro, width: 1.5),
+                  color: verdeClaro,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Column(
@@ -45,37 +43,39 @@ class MenuLogout extends StatelessWidget {
                   children: [
                     const Text(
                       'Deseja sair da conta?',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
+                      style: TextStyle(fontSize: 18),
                     ),
-                    const SizedBox(height: 32),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        OutlinedButton(
-                          onPressed: () {
-                            Navigator.pop(context); // Volta atrás
-                          },
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: verdeEscuro,
-                            side: const BorderSide(color: verdeEscuro),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                          ),
-                          child: const Text('Cancelar'),
-                        ),
                         ElevatedButton(
                           onPressed: () {
                             Navigator.pushAndRemoveUntil(
                               context,
-                              MaterialPageRoute(builder: (context) => const MenuLogin()),
+                              MaterialPageRoute(builder: (_) => const MenuLogin()),
                                   (route) => false,
                             );
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: verdeEscuro,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                           ),
-                          child: const Text('Sair'),
+                          child: const Text('Sim'),
+                        ),
+                        ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushAndRemoveUntil(
+                              context,
+                              MaterialPageRoute(builder: (_) => const MenuParticipante()),
+                                  (route) => false,
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.grey,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: const Text('Não'),
                         ),
                       ],
                     ),
