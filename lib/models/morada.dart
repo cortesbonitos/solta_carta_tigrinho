@@ -1,12 +1,11 @@
 class Morada {
-  int idMorada;
-  String codigoPostal;
-  String rua;
-  int numeroPorta;
-  String freguesia;
-  String localidade;
-  String complemento;
-  List<dynamic> localizacao; // Substitua por uma classe Localizacao se existir
+  final int idMorada;
+  final String codigoPostal;
+  final String rua;
+  final int numeroPorta;
+  final String freguesia;
+  final String localidade;
+  final String? complemento;
 
   Morada({
     required this.idMorada,
@@ -15,26 +14,30 @@ class Morada {
     required this.numeroPorta,
     required this.freguesia,
     required this.localidade,
-    required this.complemento,
-    required this.localizacao,
+    this.complemento,
   });
 
   factory Morada.fromJson(Map<String, dynamic> json) {
     return Morada(
       idMorada: json['id_morada'],
       codigoPostal: json['codigo_postal'],
-      rua: json['Rua'],
+      rua: json['rua'],
       numeroPorta: json['numero_porta'],
       freguesia: json['freguesia'],
-      localidade: json['Localidade'],
-      complemento: json['Complemento'],
-      localizacao: json['Localizacao'] ?? [],
+      localidade: json['localidade'],
+      complemento: json['complemento'],
     );
   }
-    @override
-  String toString() {
-    return 'Morada(idMorada: $idMorada, codigoPostal: $codigoPostal, rua: $rua, numeroPorta: $numeroPorta, freguesia: $freguesia, localidade: $localidade, complemento: $complemento, localizacao: $localizacao)';
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id_morada': idMorada,
+      'codigo_postal': codigoPostal,
+      'rua': rua,
+      'numero_porta': numeroPorta,
+      'freguesia': freguesia,
+      'localidade': localidade,
+      'complemento': complemento,
+    };
   }
 }
-
-

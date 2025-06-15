@@ -1,24 +1,23 @@
 class MetodoPagamento {
-  int idMetodo;
-  String nome;
-  List<dynamic> pagamento; // Substitua por List<Pagamento> se tiver a classe Pagamento
+  final int idMetodoPagamento;
+  final String nome;
 
   MetodoPagamento({
-    required this.idMetodo,
+    required this.idMetodoPagamento,
     required this.nome,
-    required this.pagamento,
   });
 
   factory MetodoPagamento.fromJson(Map<String, dynamic> json) {
     return MetodoPagamento(
-      idMetodo: json['id_metodo'],
-      nome: json['Nome'],
-      pagamento: json['Pagamento'] ?? [],
+      idMetodoPagamento: json['id_metodo_pagamento'],
+      nome: json['nome'],
     );
   }
 
-  @override
-  String toString() {
-    return 'MetodoPagamento(idMetodo: $idMetodo, nome: $nome, pagamento: $pagamento)';
+  Map<String, dynamic> toJson() {
+    return {
+      'id_metodo_pagamento': idMetodoPagamento,
+      'nome': nome,
+    };
   }
 }

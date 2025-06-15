@@ -1,20 +1,13 @@
 class Evento {
-  int idEvento;
-  String titulo;
-  String descricao;
-  DateTime dataInicio;
-  DateTime dataFim;
-  int idOrganizador;
-  int idCategoria;
-  int idLocalizacao;
-  int idOrador;
-
-  // Pode criar classes para estes se quiser detalhar mais
-  dynamic organizador;
-  dynamic categoria;
-  dynamic localizacao;
-  dynamic orador;
-  List<dynamic> inscricao;
+  final int idEvento;
+  final String titulo;
+  final String descricao;
+  final String dataInicio;
+  final String dataFim;
+  final double? mediaAvaliacoes;
+  final int? limiteInscricoes;
+  final int idCategoria;
+  final String? nomeOrador;
 
   Evento({
     required this.idEvento,
@@ -22,38 +15,39 @@ class Evento {
     required this.descricao,
     required this.dataInicio,
     required this.dataFim,
-    required this.idOrganizador,
+    this.mediaAvaliacoes,
+    this.limiteInscricoes,
     required this.idCategoria,
-    required this.idLocalizacao,
-    required this.idOrador,
-    this.organizador,
-    this.categoria,
-    this.localizacao,
-    this.orador,
-    required this.inscricao,
+    this.nomeOrador,
   });
 
   factory Evento.fromJson(Map<String, dynamic> json) {
     return Evento(
       idEvento: json['id_evento'],
-      titulo: json['Titulo'],
-      descricao: json['Descricao'],
-      dataInicio: DateTime.parse(json['data_inicio']),
-      dataFim: DateTime.parse(json['data_fim']),
-      idOrganizador: json['id_organizador'],
+      titulo: json['titulo'],
+      descricao: json['descricao'],
+      dataInicio: json['data_inicio'],
+      dataFim: json['data_fim'],
+      mediaAvaliacoes: json['media_avaliacoes'] != null
+          ? json['media_avaliacoes'].toDouble()
+          : null,
+      limiteInscricoes: json['limite_inscricoes'],
       idCategoria: json['id_categoria'],
-      idLocalizacao: json['id_localizacao'],
-      idOrador: json['id_orador'],
-      organizador: json['Organizador'],
-      categoria: json['Categoria'],
-      localizacao: json['Localizacao'],
-      orador: json['Orador'],
-      inscricao: json['Inscricao'] ?? [],
+      nomeOrador: json['nome_orador'],
     );
   }
 
-  @override
-  String toString() {
-    return 'Evento(idEvento: $idEvento, titulo: $titulo, descricao: $descricao, dataInicio: $dataInicio, dataFim: $dataFim, idOrganizador: $idOrganizador, idCategoria: $idCategoria, idLocalizacao: $idLocalizacao, idOrador: $idOrador, organizador: $organizador, categoria: $categoria, localizacao: $localizacao, orador: $orador, inscricao: $inscricao)';
+  Map<String, dynamic> toJson() {
+    return {
+      'id_evento': idEvento,
+      'titulo': titulo,
+      'descricao': descricao,
+      'data_inicio': dataInicio,
+      'data_fim': dataFim,
+      'media_avaliacoes': mediaAvaliacoes,
+      'limite_inscricoes': limiteInscricoes,
+      'id_categoria': idCategoria,
+      'nome_orador': nomeOrador,
+    };
   }
 }
