@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:ipca_gestao_eventos/data/utilizadorAPI.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_participante.dart';
 import 'menu_admin.dart';
 import 'menu_mudar_palavrapasse.dart';
@@ -11,29 +13,15 @@ class MenuLogin extends StatefulWidget {
   State<MenuLogin> createState() => _MenuLoginState();
 }
 
+
 class _MenuLoginState extends State<MenuLogin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
-
-  void _login() {
-    String email = emailController.text;
-    String password = passwordController.text;
-
-    if (email == 'admin' && password == 'admin') {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MenuAdmin()),
-      );
-    } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const MenuParticipante()),
-      );
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +99,51 @@ class _MenuLoginState extends State<MenuLogin> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: _login,
+                      onPressed: () async {
+                        
+                        var email = emailController.text;
+                        var password = passwordController.text;
+                       bool success =  await UserAPI.login(email, password);
+                       print(Utilizador.currentUser!.idTipoUtilizador);
+                        if (success) {
+
+                          if (Utilizador.currentUser!.idTipoUtilizador == 2) {
+                            // Navigate to Admin Menu
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MenuAdmin(),
+                              ),
+                            );
+                          } else if (Utilizador.currentUser!.idTipoUtilizador == 1) {
+                            // Navigate to Participant Menu
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const MenuParticipante(),
+                              ),
+                            );
+                          } else {
+                            // Handle other user types if necessary
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Tipo de utilizador desconhecido.'),
+                              ),
+                            );
+                            
+                          }
+                        } else {
+                          // Show an error message if login fails
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Login falhou. Tente novamente.'),
+                            ),
+                          );
+                        }
+
+                      },
+                      
+
                       style: ElevatedButton.styleFrom(
                         backgroundColor: verdeEscuro,
                         foregroundColor: Colors.white,
