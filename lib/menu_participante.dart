@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_login.dart';
 import 'menu_eventos_participante.dart';
 import 'menu_lista_meus_eventos.dart';
@@ -6,9 +7,10 @@ import 'menu_participante.dart';
 
 
 class MenuParticipante extends StatelessWidget {
-  const MenuParticipante({super.key});
+   MenuParticipante({super.key});
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
+  var currentUser = Utilizador.currentUser; // Definindo o tipo de utilizador como Participante
 
   @override
   Widget build(BuildContext context) {
