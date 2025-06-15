@@ -3,14 +3,12 @@ import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'menu_detalhes_evento.dart';
 
-class MenuEventosParticipante extends StatefulWidget {
-  const MenuEventosParticipante({super.key});
-
+class TesteEventosPage extends StatefulWidget {
   @override
-  State<MenuEventosParticipante> createState() => _MenuEventosParticipanteState();
+  _TesteEventosPageState createState() => _TesteEventosPageState();
 }
 
-class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
+class _TesteEventosPageState extends State<TesteEventosPage> {
   List<Evento> _eventosGratis = [];
   List<Evento> _eventosPagos = [];
   bool _isLoading = true;
@@ -29,8 +27,9 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
     try {
       final eventos = await EventosApi.getEventos();
 
+      // NOTA: usa 0.0 como preço default, até a API enviar esse campo
       for (var e in eventos) {
-        final preco = 0.0; // ← substituir por e.preco quando existir no model
+        final preco = 0.0; // ← aqui depois lês de e.preco quando tiveres na API
         if (preco == 0.0) {
           _eventosGratis.add(e);
         } else {
@@ -63,7 +62,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
   }
 
   Widget _construirSecao(String titulo, List<Evento> eventos, double precoFixo) {
-    if (eventos.isEmpty) return const SizedBox.shrink();
+    if (eventos.isEmpty) return SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +76,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
           return GestureDetector(
             onTap: () => _irParaDetalhes(context, evento, precoFixo),
             child: Container(
-              margin: const EdgeInsets.only(bottom: 20),
+              margin: const EdgeInsets.only(bottom: 16),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: verdeClaro,
@@ -123,10 +122,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Eventos'),
-        backgroundColor: verdeEscuro,
-      ),
+      appBar: AppBar(title: const Text('Testar Eventos'), backgroundColor: verdeEscuro),
       backgroundColor: Colors.white,
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -137,7 +133,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         child: ListView(
           children: [
             _construirSecao('Eventos Grátis', _eventosGratis, 0.0),
-            _construirSecao('Eventos Pagos', _eventosPagos, 10.0), // ← depois troca por evento.preco
+            _construirSecao('Eventos Pagos', _eventosPagos, 10.0), // ← até teres preço real
           ],
         ),
       ),

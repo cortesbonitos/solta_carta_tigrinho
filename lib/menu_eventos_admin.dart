@@ -1,36 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
+import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'menu_editar_evento.dart';
 import 'menu_criar_evento.dart';
 
-class MenuEventosAdmin extends StatelessWidget {
+class MenuEventosAdmin extends StatefulWidget {
   const MenuEventosAdmin({super.key});
+
+  @override
+  State<MenuEventosAdmin> createState() => _MenuEventosAdminState();
+}
+
+class _MenuEventosAdminState extends State<MenuEventosAdmin> {
+  List<Evento> _eventos = [];
+  bool _isLoading = true;
+  String? _erro;
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  final List<Map<String, dynamic>> eventos = const [
-    {
-      'titulo': 'Evento 1',
-      'descricao': 'Descrição do evento 1',
-      'preco': 0.0,
-    },
-    {
-      'titulo': 'Evento 2',
-      'descricao': 'Descrição do evento 2',
-      'preco': 5.0,
-    },
-    {
-      'titulo': 'Evento 3',
-      'descricao': 'Descrição do evento 3',
-      'preco': 10.0,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _carregarEventos();
+  }
 
-  void _editarEvento(BuildContext context) {
+  Future<void> _carregarEventos() async {
+    try {
+      final eventos = await EventosApi.getEventos();
+      setState(() {
+        _eventos = eventos;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _erro = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _editarEvento(BuildContext context, Evento evento) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => const MenuEditarEvento(),
+        builder: (_) => MenuEditarEvento(
+          idEvento: evento.idEvento,
+          titulo: evento.titulo,
+          descricao: evento.descricao,
+          preco: evento.preco,
+        ),
       ),
     );
   }
@@ -52,11 +71,16 @@ class MenuEventosAdmin extends StatelessWidget {
         backgroundColor: verdeEscuro,
       ),
       backgroundColor: Colors.white,
-      body: ListView.builder(
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _erro != null
+          ? Center(child: Text('Erro: $_erro'))
+          : ListView.builder(
         padding: const EdgeInsets.all(16),
-        itemCount: eventos.length,
+        itemCount: _eventos.length,
         itemBuilder: (context, index) {
-          final evento = eventos[index];
+          final evento = _eventos[index];
+
           return Container(
             margin: const EdgeInsets.only(bottom: 20),
             padding: const EdgeInsets.all(16),
@@ -73,7 +97,7 @@ class MenuEventosAdmin extends StatelessWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: Text(
-                        evento['titulo'],
+                        evento.titulo,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -82,18 +106,18 @@ class MenuEventosAdmin extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.edit, color: verdeEscuro),
-                      onPressed: () => _editarEvento(context),
+                      onPressed: () => _editarEvento(context, evento),
                       tooltip: 'Editar',
                     ),
                   ],
                 ),
                 const SizedBox(height: 8),
-                Text(evento['descricao']),
+                Text(evento.descricao),
                 const SizedBox(height: 8),
                 Text(
-                  evento['preco'] == 0
+                  evento.preco == 0
                       ? 'Grátis'
-                      : 'Preço: ${evento['preco'].toStringAsFixed(2)} €',
+                      : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
                   style: const TextStyle(fontStyle: FontStyle.italic),
                 ),
               ],
