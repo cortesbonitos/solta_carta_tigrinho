@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
-import 'data/inscricoesAPI.dart';
+import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
+import 'package:ipca_gestao_eventos/models/inscricao.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_pagamento_metodos.dart';
 import 'menu_logout.dart';
-import 'models/inscricao.dart';
 
 class MenuDetalhesEvento extends StatelessWidget {
   final String titulo;
@@ -13,7 +13,7 @@ class MenuDetalhesEvento extends StatelessWidget {
   final String nomeOrador;
   final DateTime dataInicio;
   final DateTime dataFim;
-  final double mediaAvaliacoes;
+  final double? mediaAvaliacoes;
   final int? limiteInscricoes;
   final int idEvento;
 
@@ -33,80 +33,9 @@ class MenuDetalhesEvento extends StatelessWidget {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  void _inscreverOuPagar(BuildContext context) async {
-    final idUtilizador = Utilizador.currentUser?.idUtilizador;
-
-    if (idUtilizador == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro: Utilizador não autenticado.')),
-      );
-      return;
-    }
-
-    if (preco > 0) {
-      // Evento pago
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Evento Pago'),
-          content: Text('Custa ${preco.toStringAsFixed(2)} €. Deseja avançar com o pagamento?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Fechar o diálogo
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => MenuPagamentoMetodos(
-                      titulo: titulo,
-                      preco: preco,
-                    ),
-                  ),
-                );
-              },
-              child: const Text('Sim'),
-            ),
-          ],
-        ),
-      );
-    } else {
-      // Evento grátis — fazer inscrição real
-      try {
-        Inscricao novaInscricao = Inscricao(
-          idInscricao: 0,
-          idEvento: idEvento,
-          idUtilizador: idUtilizador,
-          dataInscricao: DateTime.now(),
-        );
-        print(novaInscricao);
-        await InscricoesAPI.criarInscricao(novaInscricao);
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Inscrição feita com sucesso!')),
-        );
-
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const MenuLogout()),
-              (route) => false,
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao inscrever: $e')),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final String dataFormatada =
-        '${dataInicio.day}/${dataInicio.month}/${dataInicio.year} ${dataInicio.hour}:${dataInicio.minute.toString().padLeft(2, '0')} - '
-        '${dataFim.hour}:${dataFim.minute.toString().padLeft(2, '0')}';
+    final idUtilizador = Utilizador.currentUser!.idUtilizador;
 
     return Scaffold(
       appBar: AppBar(
@@ -116,7 +45,7 @@ class MenuDetalhesEvento extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Center(
         child: Container(
-          width: 340,
+          width: 320,
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: verdeClaro,
@@ -133,15 +62,11 @@ class MenuDetalhesEvento extends StatelessWidget {
               const SizedBox(height: 12),
               Text(descricao),
               const SizedBox(height: 12),
-              Text('Orador: $nomeOrador'),
-              const SizedBox(height: 8),
-              Text('Data: $dataFormatada'),
-              const SizedBox(height: 8),
-              Text('Média de avaliações: ${mediaAvaliacoes.toStringAsFixed(1)} ⭐'),
-              const SizedBox(height: 8),
-              Text(limiteInscricoes != null
-                  ? 'Limite de inscrições: $limiteInscricoes'
-                  : 'Sem limite de inscrições'),
+              Text("Orador: $nomeOrador"),
+              Text("Início: ${dataInicio.toString().substring(0, 16)}"),
+              Text("Fim: ${dataFim.toString().substring(0, 16)}"),
+              Text("Média avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'N/A'}"),
+              Text("Limite inscrições: ${limiteInscricoes?.toString() ?? 'Ilimitado'}"),
               const SizedBox(height: 12),
               Text(
                 preco == 0 ? 'Evento Grátis' : 'Preço: ${preco.toStringAsFixed(2)} €',
@@ -149,13 +74,51 @@ class MenuDetalhesEvento extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () => _inscreverOuPagar(context),
+                onPressed: () async {
+                  if (preco > 0) {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => MenuPagamentoMetodos(
+                          titulo: titulo,
+                          preco: preco,
+                        ),
+
+                      ),
+                    );
+                  } else {
+                    // Evento grátis – fazer inscrição real
+                    try {
+                      Inscricao novaInscricao = Inscricao(
+                        id_inscricao: 0,
+                        idEvento: idEvento,
+                        idUtilizador: idUtilizador,
+                        dataInscricao: DateTime.now(),
+                      );
+                      await InscricoesAPI.criarInscricao(novaInscricao);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Inscrição feita com sucesso!')),
+                      );
+
+                      Navigator.pushAndRemoveUntil(
+                        context,
+                        MaterialPageRoute(builder: (_) => const MenuLogout()),
+                            (route) => false,
+                      );
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Erro ao inscrever: $e')),
+                      );
+                    }
+                  }
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: verdeEscuro,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Inscrever-se'),
+                child: Text(preco > 0 ? 'Avançar para Pagamento' : 'Inscrever-se'),
               ),
             ],
           ),

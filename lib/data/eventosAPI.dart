@@ -28,7 +28,7 @@ abstract class EventosApi {
   }
 
   // Obter evento por ID
-  static Future<Evento> getEventoPorId(int idEvento) async {
+  static Future<Evento?> getEventoPorId(int idEvento) async {
     final url = Uri.parse('$_baseUrl/evento/$idEvento');
 
     try {
@@ -40,12 +40,15 @@ abstract class EventosApi {
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
         return Evento.fromJson(responseData);
+      } else if (response.statusCode == 404) {
+        print('Evento com ID $idEvento não encontrado.');
+        return null;
       } else {
         throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
       }
     } catch (e) {
       print('Erro ao carregar evento por ID: $e');
-      rethrow;
+      return null;
     }
   }
 

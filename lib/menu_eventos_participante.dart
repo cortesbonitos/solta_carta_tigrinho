@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
+import 'package:ipca_gestao_eventos/data/avaliacoesAPI.dart';
+import 'package:ipca_gestao_eventos/data/utilizadorAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
+import 'package:ipca_gestao_eventos/models/avaliacao.dart';
+import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_detalhes_evento.dart';
 
 class MenuEventosParticipante extends StatefulWidget {
@@ -11,8 +15,9 @@ class MenuEventosParticipante extends StatefulWidget {
 }
 
 class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
-  List<Evento> _eventosGratis = [];
-  List<Evento> _eventosPagos = [];
+  List<Evento> _eventosAtivos = [];
+  List<Evento> _eventosExpirados = [];
+  Map<int, List<Avaliacao>> _avaliacoesPorEvento = {};
   bool _isLoading = true;
   String? _erro;
 
@@ -22,19 +27,37 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
   @override
   void initState() {
     super.initState();
-    _carregarEventos();
+    _carregarTudo();
+  }
+
+  Future<void> _carregarTudo() async {
+    try {
+      await UtilizadorAPI.carregarTodos();
+      await _carregarEventos();
+    } catch (e) {
+      setState(() {
+        _erro = e.toString();
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _carregarEventos() async {
     try {
-      List<Evento> eventos = await EventosApi.getEventos();
+      final eventos = await EventosApi.getEventos();
+      final avaliacoes = await AvaliacoesAPI.getAvaliacoes();
 
+      final agora = DateTime.now();
       for (var e in eventos) {
-        if (e.preco <= 0) {
-          _eventosGratis.add(e);
+        if (e.dataFim.isAfter(agora)) {
+          _eventosAtivos.add(e);
         } else {
-          _eventosPagos.add(e);
+          _eventosExpirados.add(e);
         }
+      }
+
+      for (var a in avaliacoes) {
+        _avaliacoesPorEvento.putIfAbsent(a.idEvento, () => []).add(a);
       }
 
       setState(() {
@@ -67,7 +90,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
     );
   }
 
-  Widget _construirSecao(String titulo, List<Evento> eventos) {
+  Widget _construirSecao(String titulo, List<Evento> eventos, {bool expirado = false}) {
     if (eventos.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -79,6 +102,8 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         ),
         const SizedBox(height: 12),
         ...eventos.map((evento) {
+          final avaliacoes = _avaliacoesPorEvento[evento.idEvento] ?? [];
+
           return GestureDetector(
             onTap: () => _irParaDetalhes(context, evento),
             child: Container(
@@ -115,6 +140,32 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
                         : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
+                  if (expirado && avaliacoes.isNotEmpty) ...[
+                    const Divider(height: 20),
+                    const Text('Avaliações:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    ...avaliacoes.map((a) {
+                      final user = Utilizador.utilizadores[a.idUtilizador];
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(user?.nome ?? 'Utilizador #${a.idUtilizador}'),
+                            Row(
+                              children: List.generate(5, (i) => Icon(
+                                i < a.pontuacao ? Icons.star : Icons.star_border,
+                                color: Colors.amber,
+                                size: 18,
+                              )),
+                            ),
+                            if (a.comentario != null && a.comentario!.isNotEmpty)
+                              Text('"${a.comentario!}"'),
+                          ],
+                        ),
+                      );
+                    })
+                  ]
                 ],
               ),
             ),
@@ -141,8 +192,8 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            _construirSecao('Eventos Grátis', _eventosGratis),
-            _construirSecao('Eventos Pagos', _eventosPagos),
+            _construirSecao('Eventos Ativos', _eventosAtivos),
+            _construirSecao('Eventos Expirados', _eventosExpirados, expirado: true),
           ],
         ),
       ),

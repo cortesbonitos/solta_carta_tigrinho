@@ -4,8 +4,8 @@ import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/models/inscricao.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
-import 'menu_participante.dart';
 import 'menu_detalhes_meu_evento.dart';
+import 'menu_avaliacao.dart';
 
 class MenuListaMeusEventos extends StatefulWidget {
   const MenuListaMeusEventos({super.key});
@@ -19,7 +19,9 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
   static const Color verdeClaro = Color(0xFFA8D4BA);
   final idUtilizador = Utilizador.currentUser!.idUtilizador;
 
-  List<Evento> _eventosInscritos = [];
+  List<Evento> _eventosFuturos = [];
+  List<Evento> _eventosPassados = [];
+  List<Inscricao> _inscricoes = [];
   bool _loading = true;
   String? _erro;
 
@@ -31,24 +33,26 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
 
   Future<void> _carregarEventosInscritos() async {
     try {
+      _inscricoes = await InscricoesAPI.getInscricoesPorUser(idUtilizador);
+      final idsEventosInscritos = _inscricoes.map((i) => i.idEvento).toList();
 
-      final inscricoes = await InscricoesAPI.getInscricoesPorUser(idUtilizador);
-      final idsEventosInscritos = inscricoes.map((i) => i.idEvento).toList();
       final eventosListas = await Future.wait(
         idsEventosInscritos.map((id) async {
-          final evento = await EventosApi.getEventoPorId(id);
-          return evento;
+          try {
+            return await EventosApi.getEventoPorId(id);
+          } catch (e) {
+            return null;
+          }
         }),
       );
 
-      _eventosInscritos = eventosListas;
+      final eventos = eventosListas.whereType<Evento>().toList();
+      final agora = DateTime.now();
 
+      _eventosFuturos = eventos.where((e) => e.dataFim.isAfter(agora)).toList();
+      _eventosPassados = eventos.where((e) => e.dataFim.isBefore(agora)).toList();
 
-
-      setState(() {
-        //_eventosInscritos = apenasMeusEventos;
-        _loading = false;
-      });
+      setState(() => _loading = false);
     } catch (e) {
       setState(() {
         _erro = e.toString();
@@ -59,13 +63,18 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
 
   Future<void> _desinscrever(BuildContext context, Evento evento) async {
     try {
-      InscricoesAPI.eliminarInscricao(evento.idEvento);
+      final inscricao = _inscricoes.firstWhere(
+            (i) => i.idEvento == evento.idEvento,
+        orElse: () => throw Exception('Inscrição não encontrada'),
+      );
+
+      await InscricoesAPI.eliminarInscricao(inscricao.id_inscricao);
+      _inscricoes.remove(inscricao);
+      _carregarEventosInscritos();
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Inscrição cancelada com sucesso.')),
       );
-
-      _carregarEventosInscritos(); // Atualizar a lista
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Erro ao desinscrever: $e')),
@@ -86,6 +95,85 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
     );
   }
 
+  void _avaliarEvento(BuildContext context, Evento evento) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MenuAvaliacao(
+          idEvento: evento.idEvento,
+          tituloEvento: evento.titulo,
+        ),
+      ),
+    );
+  }
+
+
+  Widget _construirCartao(Evento evento, {required bool podeCancelar}) {
+    return GestureDetector(
+      onTap: () => _abrirDetalhes(context, evento),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: verdeClaro,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.event_available),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    evento.titulo,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Text(evento.descricao),
+            const SizedBox(height: 8),
+            Text(
+              evento.preco == 0
+                  ? 'Grátis'
+                  : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
+              style: const TextStyle(fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                ElevatedButton(
+                  onPressed: () => podeCancelar
+                      ? _desinscrever(context, evento)
+                      : _avaliarEvento(context, evento),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: podeCancelar ? Colors.red[700] : verdeEscuro,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: Text(podeCancelar ? 'Cancelar inscrição' : 'Avaliar'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -98,76 +186,21 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           ? const Center(child: CircularProgressIndicator())
           : _erro != null
           ? Center(child: Text('Erro: $_erro'))
-          : _eventosInscritos.isEmpty
+          : (_eventosFuturos.isEmpty && _eventosPassados.isEmpty)
           ? const Center(child: Text('Nenhuma inscrição encontrada.'))
-          : ListView.builder(
+          : ListView(
         padding: const EdgeInsets.all(16),
-        itemCount: _eventosInscritos.length,
-        itemBuilder: (context, index) {
-          final evento = _eventosInscritos[index];
-
-          return GestureDetector(
-            onTap: () => _abrirDetalhes(context, evento),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: verdeClaro,
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    blurRadius: 6,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.event_available),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          evento.titulo,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Text(evento.descricao),
-                  const SizedBox(height: 8),
-                  Text(
-                    evento.preco == 0
-                        ? 'Grátis'
-                        : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
-                    style: const TextStyle(fontStyle: FontStyle.italic),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () => _desinscrever(context, evento),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red[700],
-                          foregroundColor: Colors.white,
-                        ),
-                        child: const Text('Cancelar inscrição'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
+        children: [
+          if (_eventosFuturos.isNotEmpty)
+            const Text('Eventos Futuros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          ..._eventosFuturos.map((e) => _construirCartao(e, podeCancelar: true)).toList(),
+          const SizedBox(height: 20),
+          if (_eventosPassados.isNotEmpty)
+            const Text('Eventos Passados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          ..._eventosPassados.map((e) => _construirCartao(e, podeCancelar: false)).toList(),
+        ],
       ),
     );
   }

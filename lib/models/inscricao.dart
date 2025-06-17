@@ -1,11 +1,11 @@
 class Inscricao {
-   int? idInscricao;
+  final int id_inscricao;
   final int idUtilizador;
   final int idEvento;
   final DateTime dataInscricao;
 
   Inscricao({
-     this.idInscricao,
+    required this.id_inscricao,
     required this.idUtilizador,
     required this.idEvento,
     required this.dataInscricao,
@@ -13,7 +13,7 @@ class Inscricao {
 
   factory Inscricao.fromJson(Map<String, dynamic> json) {
     return Inscricao(
-      idInscricao: json['id_inscricao'],
+      id_inscricao: json['id_inscricao'],
       idUtilizador: json['id_utilizador'],
       idEvento: json['id_evento'],
       dataInscricao: DateTime.parse(json['data_inscricao']),
@@ -22,14 +22,10 @@ class Inscricao {
 
   Map<String, dynamic> toJson() {
     return {
+      'id_inscricao': id_inscricao,
       'id_utilizador': idUtilizador,
       'id_evento': idEvento,
-      'data_inscricao': dataInscricao,
+      'data_inscricao': dataInscricao.toIso8601String(),
     };
   }
-  @override
-  String toString() {
-    return 'Inscricao{idInscricao: $idInscricao, idUtilizador: $idUtilizador, idEvento: $idEvento, dataInscricao: $dataInscricao}';
-  }
-
 }

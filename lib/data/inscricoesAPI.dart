@@ -28,7 +28,7 @@ abstract class InscricoesAPI {
         throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Erro ao carregar eventos: $e');
+      print('Erro ao carregar inscrições: $e');
       rethrow;
     }
   }
@@ -54,7 +54,7 @@ abstract class InscricoesAPI {
         throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
       }
     } catch (e) {
-      print('Erro ao carregar eventos: $e');
+      print('Erro ao carregar inscrições: $e');
       rethrow;
     }
   }
@@ -69,7 +69,7 @@ abstract class InscricoesAPI {
     );
 
     if (response.statusCode != 200 && response.statusCode != 204) {
-      throw Exception('Erro ao eliminar Inscricao: ${response.statusCode}');
+      throw Exception('Erro ao eliminar inscrição: ${response.statusCode}');
     }
   }
 
@@ -89,7 +89,7 @@ abstract class InscricoesAPI {
 
     if (response.statusCode != 201 && response.statusCode != 200) {
       print(response.body);
-      throw Exception('Erro ao criar Inscricao: ${response.body}');
+      throw Exception('Erro ao criar inscrição: ${response.body}');
     }
   }
 }

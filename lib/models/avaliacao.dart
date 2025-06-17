@@ -1,14 +1,16 @@
 class Avaliacao {
   final int idAvaliacao;
-  final int pontuacao;       // entre 1 e 5
+  final int pontuacao;
   final int idUtilizador;
   final int idEvento;
+  final String? comentario;
 
   Avaliacao({
     required this.idAvaliacao,
     required this.pontuacao,
     required this.idUtilizador,
     required this.idEvento,
+    this.comentario,
   });
 
   factory Avaliacao.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class Avaliacao {
       pontuacao: json['pontuacao'],
       idUtilizador: json['id_utilizador'],
       idEvento: json['id_evento'],
+      comentario: json['comentario'],
     );
   }
 
@@ -26,6 +29,7 @@ class Avaliacao {
       'pontuacao': pontuacao,
       'id_utilizador': idUtilizador,
       'id_evento': idEvento,
+      'comentario': comentario,
     };
   }
 }

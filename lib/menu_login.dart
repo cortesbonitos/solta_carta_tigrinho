@@ -13,15 +13,12 @@ class MenuLogin extends StatefulWidget {
   State<MenuLogin> createState() => _MenuLoginState();
 }
 
-
 class _MenuLoginState extends State<MenuLogin> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
-
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
-  
 
   @override
   Widget build(BuildContext context) {
@@ -100,50 +97,34 @@ class _MenuLoginState extends State<MenuLogin> {
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: () async {
-                        
-                        var email = emailController.text;
-                        var password = passwordController.text;
-                       bool success =  await UserAPI.login(email, password);
-                       print(Utilizador.currentUser!.idTipoUtilizador);
-                        if (success) {
+                        final email = emailController.text;
+                        final password = passwordController.text;
 
-                          if (Utilizador.currentUser!.idTipoUtilizador == 2) {
-                            // Navigate to Admin Menu
+                        bool success = await UtilizadorAPI.login(email, password);
+
+                        if (success) {
+                          final tipo = Utilizador.currentUser!.idTipoUtilizador;
+                          if (tipo == 2) {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => const MenuAdmin(),
-                              ),
+                              MaterialPageRoute(builder: (_) => const MenuAdmin()),
                             );
-                          } else if (Utilizador.currentUser!.idTipoUtilizador == 1) {
-                            // Navigate to Participant Menu
+                          } else if (tipo == 1) {
                             Navigator.pushReplacement(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) => const MenuParticipante(),
-                              ),
+                              MaterialPageRoute(builder: (_) => const MenuParticipante()),
                             );
                           } else {
-                            // Handle other user types if necessary
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Tipo de utilizador desconhecido.'),
-                              ),
+                              const SnackBar(content: Text('Tipo de utilizador desconhecido.')),
                             );
-                            
                           }
                         } else {
-                          // Show an error message if login fails
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Login falhou. Tente novamente.'),
-                            ),
+                            const SnackBar(content: Text('Login falhou. Tente novamente.')),
                           );
                         }
-
                       },
-                      
-
                       style: ElevatedButton.styleFrom(
                         backgroundColor: verdeEscuro,
                         foregroundColor: Colors.white,
@@ -157,8 +138,7 @@ class _MenuLoginState extends State<MenuLogin> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                            const MenuMudarPalavraPasse(),
+                            builder: (_) => const MenuMudarPalavraPasse(),
                           ),
                         );
                       },
