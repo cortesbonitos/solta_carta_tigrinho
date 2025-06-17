@@ -35,10 +35,14 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
       final inscricoes = await InscricoesAPI.getInscricoesPorUser(idUtilizador);
       final idsEventosInscritos = inscricoes.map((i) => i.idEvento).toList();
       final eventosListas = await Future.wait(
-        idsEventosInscritos.map((id) => EventosApi.getEventosPorId(id)),
+        idsEventosInscritos.map((id) async {
+          final evento = await EventosApi.getEventoPorId(id);
+          return evento;
+        }),
       );
 
-       _eventosInscritos = eventosListas.expand((e) => e).toList();
+      _eventosInscritos = eventosListas;
+
 
 
       setState(() {

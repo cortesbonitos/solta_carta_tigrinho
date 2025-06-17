@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'menu_detalhes_evento.dart';
-import 'dart:math';
 
 class MenuEventosParticipante extends StatefulWidget {
   const MenuEventosParticipante({super.key});
@@ -29,16 +28,9 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
   Future<void> _carregarEventos() async {
     try {
       List<Evento> eventos = await EventosApi.getEventos();
-      final random = Random();
 
       for (var e in eventos) {
-        e.preco = random.nextDouble() * 50; // valor entre 0 e 50
-      }
-
-
-      for (var e in eventos) {
-        final preco = 0.0; // ← substituir por e.preco quando existir no model
-        if (preco == 0.0) {
+        if (e.preco <= 0) {
           _eventosGratis.add(e);
         } else {
           _eventosPagos.add(e);
@@ -56,7 +48,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
     }
   }
 
-  void _irParaDetalhes(BuildContext context, Evento evento, double preco) {
+  void _irParaDetalhes(BuildContext context, Evento evento) {
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -69,14 +61,13 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          idEvento: evento.idEvento, // ✅ Adiciona esta linha
+          idEvento: evento.idEvento,
         ),
       ),
     );
   }
 
-
-  Widget _construirSecao(String titulo, List<Evento> eventos, double precoFixo) {
+  Widget _construirSecao(String titulo, List<Evento> eventos) {
     if (eventos.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -89,7 +80,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         const SizedBox(height: 12),
         ...eventos.map((evento) {
           return GestureDetector(
-            onTap: () => _irParaDetalhes(context, evento, precoFixo),
+            onTap: () => _irParaDetalhes(context, evento),
             child: Container(
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
@@ -119,9 +110,9 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
                   Text(evento.descricao),
                   const SizedBox(height: 8),
                   Text(
-                    precoFixo == 0
+                    evento.preco <= 0
                         ? 'Grátis'
-                        : 'Preço: ${precoFixo.toStringAsFixed(2)} €',
+                        : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
                     style: const TextStyle(fontStyle: FontStyle.italic),
                   ),
                 ],
@@ -150,8 +141,8 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         padding: const EdgeInsets.all(16),
         child: ListView(
           children: [
-            _construirSecao('Eventos Grátis', _eventosGratis, 0.0),
-            _construirSecao('Eventos Pagos', _eventosPagos, 10.0), // ← depois troca por evento.preco
+            _construirSecao('Eventos Grátis', _eventosGratis),
+            _construirSecao('Eventos Pagos', _eventosPagos),
           ],
         ),
       ),
