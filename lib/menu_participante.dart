@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import 'menu_login.dart';
 import 'menu_eventos_participante.dart';
 import 'menu_lista_meus_eventos.dart';
-import 'menu_participante.dart';
-
+import 'menu_bilhetes.dart';
 
 class MenuParticipante extends StatelessWidget {
   const MenuParticipante({super.key});
@@ -75,6 +74,21 @@ class MenuParticipante extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
                       ),
                       child: const Text('Listar Meus Eventos'),
+                    ),
+                    const SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MenuBilhetes()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: verdeEscuro,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      ),
+                      child: const Text('Ver Bilhetes'),
                     ),
                     const SizedBox(height: 20),
                     ElevatedButton(
