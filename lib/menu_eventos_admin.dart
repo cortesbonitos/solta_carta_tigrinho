@@ -62,7 +62,7 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
           dataFim: evento.dataFim.toIso8601String(),
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          idCategoria: evento.idCategoria,
+          Categoria: evento.categoria,
           nomeOrador: evento.nomeOrador,
         ),
       ),

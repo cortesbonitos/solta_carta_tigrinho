@@ -62,7 +62,7 @@ class _MenuEditarEventoState extends State<MenuEditarEvento> {
       dataFim: DateTime(2025, 6, 25, 12, 0),
       mediaAvaliacoes: 5.0,
       limiteInscricoes: null,
-      idCategoria: 2,
+      categoria: "Tecnologia",
       nomeOrador: "Prof. Ana Marques",
       preco: preco,
     );

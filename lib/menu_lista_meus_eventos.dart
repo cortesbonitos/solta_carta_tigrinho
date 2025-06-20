@@ -6,6 +6,8 @@ import 'package:ipca_gestao_eventos/models/inscricao.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
 import 'menu_detalhes_meu_evento.dart';
 import 'menu_avaliacao.dart';
+import 'menu_detalhes_evento.dart';
+
 
 class MenuListaMeusEventos extends StatefulWidget {
   const MenuListaMeusEventos({super.key});
@@ -40,7 +42,7 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
         idsEventosInscritos.map((id) async {
           try {
             return await EventosApi.getEventoPorId(id);
-          } catch (e) {
+          } catch (_) {
             return null;
           }
         }),
@@ -60,6 +62,8 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
       });
     }
   }
+
+
 
   Future<void> _desinscrever(BuildContext context, Evento evento) async {
     try {
@@ -86,14 +90,22 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => MenuDetalhesMeuEvento(
+        builder: (_) => MenuDetalhesEvento(
+          idEvento: evento.idEvento,
           titulo: evento.titulo,
           descricao: evento.descricao,
           preco: evento.preco,
+          nomeOrador: evento.nomeOrador,
+          dataInicio: evento.dataInicio,
+          dataFim: evento.dataFim,
+          mediaAvaliacoes: evento.mediaAvaliacoes,
+          limiteInscricoes: evento.limiteInscricoes,
+          categoria: evento.categoria,
         ),
       ),
     );
   }
+
 
   void _avaliarEvento(BuildContext context, Evento evento) {
     Navigator.push(

@@ -11,7 +11,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
   final String dataFim;
   final double? mediaAvaliacoes;
   final int? limiteInscricoes;
-  final int idCategoria;
+  final String Categoria;
   final String nomeOrador;
 
   const MenuDetalhesEventoAdmin({
@@ -24,7 +24,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
     required this.dataFim,
     required this.mediaAvaliacoes,
     required this.limiteInscricoes,
-    required this.idCategoria,
+    required this.Categoria,
     required this.nomeOrador,
   });
 
@@ -102,7 +102,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
               Text('Fim: $dataFim'),
               const SizedBox(height: 8),
               Text('Orador: $nomeOrador'),
-              Text('Categoria ID: $idCategoria'),
+              Text('Categoria: $Categoria'),
               Text('Limite de Inscrições: ${limiteInscricoes ?? 'Ilimitado'}'),
               Text('Média Avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'Sem avaliações'}'),
               const SizedBox(height: 24),

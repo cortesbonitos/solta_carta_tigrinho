@@ -1,7 +1,6 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'menu_eventos_admin.dart';
+import 'package:ipca_gestao_eventos/models/eventos.dart';
+import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 
 class MenuCriarEvento extends StatefulWidget {
   const MenuCriarEvento({super.key});
@@ -11,116 +10,91 @@ class MenuCriarEvento extends StatefulWidget {
 }
 
 class _MenuCriarEventoState extends State<MenuCriarEvento> {
-  final TextEditingController tituloController = TextEditingController();
-  final TextEditingController descricaoController = TextEditingController();
-  final TextEditingController precoController = TextEditingController();
-  final TextEditingController oradorController = TextEditingController();
-  final TextEditingController limiteController = TextEditingController();
+  final TextEditingController _tituloController = TextEditingController();
+  final TextEditingController _descricaoController = TextEditingController();
+  final TextEditingController _precoController = TextEditingController();
+  final TextEditingController _nomeOradorController = TextEditingController();
+  final TextEditingController _limiteInscricoesController = TextEditingController();
+  final TextEditingController _categoriaController = TextEditingController();
 
-  DateTime? dataInicio;
-  DateTime? dataFim;
+  DateTime? _dataInicio;
+  TimeOfDay? _horaInicio;
+  DateTime? _dataFim;
+  TimeOfDay? _horaFim;
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  final String apiUrl = 'https://ipcaeventos-cmh2evayfvghhce9.spaincentral-01.azurewebsites.net/api/evento';
-
-  bool _isLoading = false;
-
-  Future<void> _selecionarDataHora({required bool isInicio}) async {
-    final DateTime? data = await showDatePicker(
+  Future<void> _selecionarDataHora(BuildContext context, bool inicio) async {
+    final data = await showDatePicker(
       context: context,
       initialDate: DateTime.now(),
-      firstDate: DateTime(2024),
-      lastDate: DateTime(2030),
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2101),
     );
 
-    if (data == null) return;
+    if (data != null) {
+      final hora = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.now(),
+      );
 
-    final TimeOfDay? hora = await showTimePicker(
-      context: context,
-      initialTime: TimeOfDay.now(),
-    );
-
-    if (hora == null) return;
-
-    final selecionada = DateTime(data.year, data.month, data.day, hora.hour, hora.minute);
-
-    setState(() {
-      if (isInicio) {
-        dataInicio = selecionada;
-      } else {
-        dataFim = selecionada;
+      if (hora != null) {
+        setState(() {
+          if (inicio) {
+            _dataInicio = data;
+            _horaInicio = hora;
+          } else {
+            _dataFim = data;
+            _horaFim = hora;
+          }
+        });
       }
-    });
+    }
   }
 
-  String _formataDataSemSegundos(DateTime data) {
-    return "${data.year.toString().padLeft(4, '0')}-"
-        "${data.month.toString().padLeft(2, '0')}-"
-        "${data.day.toString().padLeft(2, '0')}T"
-        "${data.hour.toString().padLeft(2, '0')}:"
-        "${data.minute.toString().padLeft(2, '0')}";
-  }
-
-  Future<void> _criarEvento() async {
-    final titulo = tituloController.text.trim();
-    final descricao = descricaoController.text.trim();
-    final precoTexto = precoController.text.trim();
-    final orador = oradorController.text.trim();
-    final limiteTexto = limiteController.text.trim();
-
-    final double preco = double.tryParse(precoTexto) ?? 0.0;
-    final int? limiteInscricoes = limiteTexto.isEmpty ? null : int.tryParse(limiteTexto);
-
-    if (titulo.isEmpty || descricao.isEmpty || orador.isEmpty || dataInicio == null || dataFim == null) {
+  void _criarEvento() async {
+    if (_dataInicio == null || _dataFim == null || _horaInicio == null || _horaFim == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Preenche todos os campos obrigatórios.')),
+        const SnackBar(content: Text('Por favor selecione data e hora de início e fim')),
       );
       return;
     }
 
-    setState(() => _isLoading = true);
+    final dataHoraInicio = DateTime(
+      _dataInicio!.year,
+      _dataInicio!.month,
+      _dataInicio!.day,
+      _horaInicio!.hour,
+      _horaInicio!.minute,
+    );
 
-    final Map<String, dynamic> eventoData = {
-      "titulo": titulo,
-      "descricao": descricao,
-      "data_inicio": _formataDataSemSegundos(dataInicio!),
-      "data_fim": _formataDataSemSegundos(dataFim!),
-      "media_avaliacoes": 5.0,
-      "limite_inscricoes": limiteInscricoes,
-      "id_categoria": 2,
-      "nome_orador": orador,
-      "preco": preco,
-    };
+    final dataHoraFim = DateTime(
+      _dataFim!.year,
+      _dataFim!.month,
+      _dataFim!.day,
+      _horaFim!.hour,
+      _horaFim!.minute,
+    );
+
+    final novoEvento = Evento(
+      idEvento: 0,
+      titulo: _tituloController.text,
+      descricao: _descricaoController.text,
+      preco: double.tryParse(_precoController.text) ?? 0.0,
+      dataInicio: dataHoraInicio,
+      dataFim: dataHoraFim,
+      mediaAvaliacoes: 0,
+      limiteInscricoes: int.tryParse(_limiteInscricoesController.text),
+      nomeOrador: _nomeOradorController.text,
+      categoria: _categoriaController.text,
+    );
 
     try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(eventoData),
-      );
-
-      setState(() => _isLoading = false);
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Evento criado com sucesso!')),
-        );
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const MenuEventosAdmin()),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erro ao criar evento: ${response.statusCode}')),
-        );
-      }
+      await EventosApi.criarEvento(novoEvento);
+      Navigator.pop(context);
     } catch (e) {
-      setState(() => _isLoading = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erro de ligação ao servidor.')),
-      );
+      print('Erro ao criar evento: $e');
     }
   }
 
@@ -128,108 +102,65 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Criar Evento'),
+        title: const Text("Criar Evento"),
         backgroundColor: verdeEscuro,
       ),
       backgroundColor: Colors.white,
-      body: Center(
-        child: Container(
-          width: 320,
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: verdeClaro,
-            borderRadius: BorderRadius.circular(12),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade300,
-                blurRadius: 6,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const Text('Título do Evento'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: tituloController,
-                  decoration: _inputDecoration(),
-                ),
-                const SizedBox(height: 16),
-                const Text('Descrição'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: descricaoController,
-                  maxLines: 3,
-                  decoration: _inputDecoration(),
-                ),
-                const SizedBox(height: 16),
-                const Text('Orador'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: oradorController,
-                  decoration: _inputDecoration(),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () => _selecionarDataHora(isInicio: true),
-                  child: Text(dataInicio == null
-                      ? 'Selecionar Data de Início'
-                      : 'Início: ${dataInicio!.day}/${dataInicio!.month} ${dataInicio!.hour}:${dataInicio!.minute.toString().padLeft(2, '0')}'),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: () => _selecionarDataHora(isInicio: false),
-                  child: Text(dataFim == null
-                      ? 'Selecionar Data de Fim'
-                      : 'Fim: ${dataFim!.day}/${dataFim!.month} ${dataFim!.hour}:${dataFim!.minute.toString().padLeft(2, '0')}'),
-                ),
-                const SizedBox(height: 16),
-                const Text('Preço (€)'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: precoController,
-                  keyboardType: TextInputType.number,
-                  decoration: _inputDecoration().copyWith(hintText: '0 para evento grátis'),
-                ),
-                const SizedBox(height: 16),
-                const Text('Limite de Inscrições (opcional)'),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: limiteController,
-                  keyboardType: TextInputType.number,
-                  decoration: _inputDecoration().copyWith(hintText: 'Deixe em branco para sem limite'),
-                ),
-                const SizedBox(height: 24),
-                _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : ElevatedButton(
-                  onPressed: _criarEvento,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: verdeEscuro,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Criar Evento'),
-                ),
-              ],
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ListView(
+          children: [
+            TextField(
+              controller: _tituloController,
+              decoration: const InputDecoration(labelText: 'Título'),
             ),
-          ),
+            TextField(
+              controller: _descricaoController,
+              decoration: const InputDecoration(labelText: 'Descrição'),
+            ),
+            TextField(
+              controller: _precoController,
+              decoration: const InputDecoration(labelText: 'Preço'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: _nomeOradorController,
+              decoration: const InputDecoration(labelText: 'Nome do Orador'),
+            ),
+            TextField(
+              controller: _limiteInscricoesController,
+              decoration: const InputDecoration(labelText: 'Limite de Inscrições'),
+              keyboardType: TextInputType.number,
+            ),
+            TextField(
+              controller: _categoriaController,
+              decoration: const InputDecoration(labelText: 'Categoria'),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => _selecionarDataHora(context, true),
+              child: Text(
+                _dataInicio == null || _horaInicio == null
+                    ? 'Selecionar Data/Hora Início'
+                    : 'Início: ${_dataInicio!.toLocal().toString().split(' ')[0]} ${_horaInicio!.format(context)}',
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () => _selecionarDataHora(context, false),
+              child: Text(
+                _dataFim == null || _horaFim == null
+                    ? 'Selecionar Data/Hora Fim'
+                    : 'Fim: ${_dataFim!.toLocal().toString().split(' ')[0]} ${_horaFim!.format(context)}',
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _criarEvento,
+              style: ElevatedButton.styleFrom(backgroundColor: verdeEscuro, foregroundColor: Colors.white),
+              child: const Text('Criar Evento'),
+            )
+          ],
         ),
-      ),
-    );
-  }
-
-  InputDecoration _inputDecoration() {
-    return InputDecoration(
-      filled: true,
-      fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderSide: BorderSide.none,
-        borderRadius: BorderRadius.circular(8),
       ),
     );
   }

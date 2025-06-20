@@ -5,15 +5,11 @@ import 'package:ipca_gestao_eventos/models/eventos.dart';
 abstract class EventosApi {
   static const String _baseUrl = 'https://ipcaeventos-cmh2evayfvghhce9.spaincentral-01.azurewebsites.net/api';
 
-  // Obter lista de eventos
   static Future<List<Evento>> getEventos() async {
     final url = Uri.parse('$_baseUrl/evento');
 
     try {
-      final response = await http.get(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
+      final response = await http.get(url, headers: {'Content-Type': 'application/json'});
 
       if (response.statusCode == 200) {
         final List<dynamic> responseData = jsonDecode(response.body);
@@ -27,15 +23,11 @@ abstract class EventosApi {
     }
   }
 
-  // Obter evento por ID
   static Future<Evento?> getEventoPorId(int idEvento) async {
     final url = Uri.parse('$_baseUrl/evento/$idEvento');
 
     try {
-      final response = await http.get(
-        url,
-        headers: {'Content-Type': 'application/json'},
-      );
+      final response = await http.get(url, headers: {'Content-Type': 'application/json'});
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = jsonDecode(response.body);
@@ -52,7 +44,6 @@ abstract class EventosApi {
     }
   }
 
-  // Atualizar evento existente
   static Future<void> atualizarEvento(Evento evento) async {
     final url = Uri.parse('$_baseUrl/evento/${evento.idEvento}');
 
@@ -67,7 +58,6 @@ abstract class EventosApi {
     }
   }
 
-  // Criar novo evento
   static Future<void> criarEvento(Evento evento) async {
     final url = Uri.parse('$_baseUrl/evento');
 
@@ -82,7 +72,6 @@ abstract class EventosApi {
     }
   }
 
-  // Eliminar evento por ID
   static Future<void> eliminarEvento(int idEvento) async {
     final url = Uri.parse('$_baseUrl/evento/$idEvento');
 
@@ -96,7 +85,6 @@ abstract class EventosApi {
     }
   }
 
-  // Inscrever participante em evento
   static Future<void> inscreverParticipante({
     required int idEvento,
     required int idUtilizador,
@@ -120,24 +108,23 @@ abstract class EventosApi {
     }
   }
 
-  // Listar eventos onde o utilizador está inscrito
   static Future<List<Evento>> getEventosInscritosPorUtilizador(int idUtilizador) async {
     final url = Uri.parse('$_baseUrl/inscricao/utilizador/$idUtilizador');
 
-    final response = await http.get(
-      url,
-      headers: {'Content-Type': 'application/json'},
-    );
+    final response = await http.get(url, headers: {'Content-Type': 'application/json'});
 
     if (response.statusCode == 200) {
       final List<dynamic> responseData = jsonDecode(response.body);
-      return responseData.map((json) => Evento.fromJson(json)).toList();
+
+      return responseData.map((json) {
+        final eventoJson = json['evento'];
+        return Evento.fromJson(eventoJson);
+      }).toList();
     } else {
       throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
     }
   }
 
-  // Cancelar inscrição
   static Future<void> cancelarInscricao(int idEvento, int idUtilizador) async {
     final url = Uri.parse('$_baseUrl/inscricao/cancelar');
 

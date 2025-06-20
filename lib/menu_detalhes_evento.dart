@@ -16,6 +16,7 @@ class MenuDetalhesEvento extends StatelessWidget {
   final double? mediaAvaliacoes;
   final int? limiteInscricoes;
   final int idEvento;
+  final String categoria;
 
   const MenuDetalhesEvento({
     super.key,
@@ -28,6 +29,7 @@ class MenuDetalhesEvento extends StatelessWidget {
     required this.mediaAvaliacoes,
     required this.limiteInscricoes,
     required this.idEvento,
+    required this.categoria,
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -59,8 +61,16 @@ class MenuDetalhesEvento extends StatelessWidget {
                 titulo,
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 8),
+              Text(
+                'Categoria: $categoria',
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 12),
-              Text(descricao),
+              Text(
+                'Descrição: $descricao',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               const SizedBox(height: 12),
               Text("Orador: $nomeOrador"),
               Text("Início: ${dataInicio.toString().substring(0, 16)}"),
@@ -83,11 +93,9 @@ class MenuDetalhesEvento extends StatelessWidget {
                           titulo: titulo,
                           preco: preco,
                         ),
-
                       ),
                     );
                   } else {
-                    // Evento grátis – fazer inscrição real
                     try {
                       Inscricao novaInscricao = Inscricao(
                         id_inscricao: 0,

@@ -6,7 +6,7 @@ class Evento {
   final DateTime dataFim;
   final double mediaAvaliacoes;
   final int? limiteInscricoes;
-  final int idCategoria;
+  final String categoria;
   final String nomeOrador;
   double preco;
 
@@ -18,7 +18,7 @@ class Evento {
     required this.dataFim,
     required this.mediaAvaliacoes,
     this.limiteInscricoes,
-    required this.idCategoria,
+    required this.categoria,
     required this.nomeOrador,
     required this.preco,
   });
@@ -32,7 +32,7 @@ class Evento {
       dataFim: DateTime.parse(json['data_fim']),
       mediaAvaliacoes: (json['media_avaliacoes'] ?? 0).toDouble(),
       limiteInscricoes: json['limite_inscricoes'],
-      idCategoria: json['id_categoria'],
+      categoria: json['categoria'] ?? 'Sem Categoria',
       nomeOrador: json['nome_orador'],
       preco: (json['preco'] ?? 0).toDouble(),
     );
@@ -47,7 +47,7 @@ class Evento {
       'data_fim': dataFim.toIso8601String(),
       'media_avaliacoes': mediaAvaliacoes,
       'limite_inscricoes': limiteInscricoes,
-      'id_categoria': idCategoria,
+      'categoria': categoria,
       'nome_orador': nomeOrador,
       'preco': preco,
     };
