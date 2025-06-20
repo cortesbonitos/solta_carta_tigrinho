@@ -22,7 +22,7 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  final List<String> metodos = ['MB Way', 'Cartão de Crédito', 'PayPal'];
+  final List<String> metodos = ['PayPal']; // Apenas PayPal
 
   void _confirmarPagamento() {
     if (metodoSelecionado == null) {
@@ -32,26 +32,16 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
       return;
     }
 
-    if (metodoSelecionado == 'PayPal') {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => MenuPagamentoPaypal(
-            titulo: widget.titulo,
-            preco: widget.preco,
-          ),
+    // Ir diretamente para o MenuPagamentoPaypal
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => MenuPagamentoPaypal(
+          titulo: widget.titulo,
+          preco: widget.preco,
         ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pagamento realizado com sucesso!')),
-      );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => const MenuParticipante()),
-            (route) => false,
-      );
-    }
+      ),
+    );
   }
 
   @override
@@ -82,16 +72,16 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
               const SizedBox(height: 24),
               const Text('Selecione um método de pagamento:'),
               const SizedBox(height: 12),
-              ...metodos.map((metodo) => RadioListTile(
-                title: Text(metodo),
-                value: metodo,
+              RadioListTile(
+                title: const Text('PayPal'),
+                value: 'PayPal',
                 groupValue: metodoSelecionado,
                 onChanged: (value) {
                   setState(() {
                     metodoSelecionado = value;
                   });
                 },
-              )),
+              ),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _confirmarPagamento,

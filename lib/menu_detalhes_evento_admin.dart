@@ -13,6 +13,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
   final int? limiteInscricoes;
   final String Categoria;
   final String nomeOrador;
+  final String local; // <-- Adicionado
 
   const MenuDetalhesEventoAdmin({
     super.key,
@@ -26,6 +27,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
     required this.limiteInscricoes,
     required this.Categoria,
     required this.nomeOrador,
+    required this.local, // <-- Adicionado
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -103,6 +105,7 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
               const SizedBox(height: 8),
               Text('Orador: $nomeOrador'),
               Text('Categoria: $Categoria'),
+              Text('Localização: $local'), // <-- Adicionado
               Text('Limite de Inscrições: ${limiteInscricoes ?? 'Ilimitado'}'),
               Text('Média Avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'Sem avaliações'}'),
               const SizedBox(height: 24),

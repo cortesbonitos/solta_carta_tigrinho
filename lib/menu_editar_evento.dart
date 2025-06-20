@@ -64,7 +64,7 @@ class _MenuEditarEventoState extends State<MenuEditarEvento> {
       limiteInscricoes: null,
       categoria: "Tecnologia",
       nomeOrador: "Prof. Ana Marques",
-      preco: preco,
+      preco: preco, localizacao: '',
     );
 
     try {

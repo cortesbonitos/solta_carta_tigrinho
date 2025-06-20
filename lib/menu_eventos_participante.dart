@@ -85,7 +85,7 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
           idEvento: evento.idEvento,
-          categoria: evento.categoria, // CORRIGIDO AQUI!
+          categoria: evento.categoria, localizacao: '', // CORRIGIDO AQUI!
         ),
       ),
     );

@@ -17,6 +17,7 @@ class MenuDetalhesEvento extends StatelessWidget {
   final int? limiteInscricoes;
   final int idEvento;
   final String categoria;
+  final String localizacao; // <--- ADICIONADO
 
   const MenuDetalhesEvento({
     super.key,
@@ -30,6 +31,7 @@ class MenuDetalhesEvento extends StatelessWidget {
     required this.limiteInscricoes,
     required this.idEvento,
     required this.categoria,
+    required this.localizacao, // <--- ADICIONADO
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -62,21 +64,16 @@ class MenuDetalhesEvento extends StatelessWidget {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
-              Text(
-                'Categoria: $categoria',
-                style: const TextStyle(fontWeight: FontWeight.w500),
-              ),
+              Text('Categoria: $categoria', style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 12),
-              Text(
-                'Descrição: $descricao',
-                style: TextStyle(fontWeight: FontWeight.w500),
-              ),
+              Text('Descrição: $descricao', style: const TextStyle(fontWeight: FontWeight.w500)),
               const SizedBox(height: 12),
-              Text("Orador: $nomeOrador"),
-              Text("Início: ${dataInicio.toString().substring(0, 16)}"),
-              Text("Fim: ${dataFim.toString().substring(0, 16)}"),
-              Text("Média avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'N/A'}"),
-              Text("Limite inscrições: ${limiteInscricoes?.toString() ?? 'Ilimitado'}"),
+              Text('Orador: $nomeOrador'),
+              Text('Início: ${dataInicio.toString().substring(0, 16)}'),
+              Text('Fim: ${dataFim.toString().substring(0, 16)}'),
+              Text('Localização: $localizacao'), // <--- ADICIONADO
+              Text('Média avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'N/A'}'),
+              Text('Limite inscrições: ${limiteInscricoes?.toString() ?? 'Ilimitado'}'),
               const SizedBox(height: 12),
               Text(
                 preco == 0 ? 'Evento Grátis' : 'Preço: ${preco.toStringAsFixed(2)} €',

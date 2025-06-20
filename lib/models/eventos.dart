@@ -2,6 +2,7 @@ class Evento {
   final int idEvento;
   final String titulo;
   final String descricao;
+  final String localizacao;
   final DateTime dataInicio;
   final DateTime dataFim;
   final double mediaAvaliacoes;
@@ -14,6 +15,7 @@ class Evento {
     required this.idEvento,
     required this.titulo,
     required this.descricao,
+    required this.localizacao,
     required this.dataInicio,
     required this.dataFim,
     required this.mediaAvaliacoes,
@@ -28,6 +30,7 @@ class Evento {
       idEvento: json['id_evento'],
       titulo: json['titulo'],
       descricao: json['descricao'],
+      localizacao: json['localizacao'],
       dataInicio: DateTime.parse(json['data_inicio']),
       dataFim: DateTime.parse(json['data_fim']),
       mediaAvaliacoes: (json['media_avaliacoes'] ?? 0).toDouble(),
@@ -43,6 +46,7 @@ class Evento {
       'id_evento': idEvento,
       'titulo': titulo,
       'descricao': descricao,
+      'localizacao': localizacao,
       'data_inicio': dataInicio.toIso8601String(),
       'data_fim': dataFim.toIso8601String(),
       'media_avaliacoes': mediaAvaliacoes,

@@ -100,7 +100,7 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          categoria: evento.categoria,
+          categoria: evento.categoria, localizacao: '',
         ),
       ),
     );

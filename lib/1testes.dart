@@ -61,7 +61,7 @@ class _TesteEventosPageState extends State<TesteEventosPage> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          idEvento: evento.idEvento, categoria: '', // ✅ Linha que faltava
+          idEvento: evento.idEvento, categoria: '', localizacao: '', // ✅ Linha que faltava
         ),
       ),
     );

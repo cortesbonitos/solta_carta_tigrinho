@@ -63,7 +63,7 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
           Categoria: evento.categoria,
-          nomeOrador: evento.nomeOrador,
+          nomeOrador: evento.nomeOrador, local: '',
         ),
       ),
     ).then((_) => _carregarEventos());
