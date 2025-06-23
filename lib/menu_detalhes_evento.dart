@@ -46,9 +46,9 @@ class MenuDetalhesEvento extends StatelessWidget {
     try {
       final inscricoes = await InscricoesAPI.getInscricoesPorEvento(idEvento);
       final numInscritos = inscricoes.length;
-      final limite = limiteInscricoes ?? double.infinity.toInt();
+      final limite = limiteInscricoes ?? -1;
 
-      if (numInscritos >= limite) {
+      if (limite > 0 && numInscritos >= limite) {
         await FilaEsperaAPI.criarEntradaFila(
           FilaEspera(
             dataEntrada: DateTime.now(),
@@ -58,9 +58,7 @@ class MenuDetalhesEvento extends StatelessWidget {
         );
 
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text("Evento lotado. Foste adicionado à fila de espera."),
-          ),
+          const SnackBar(content: Text("Evento cheio! Entraste na fila de espera.")),
         );
         Navigator.pop(context);
         return;
