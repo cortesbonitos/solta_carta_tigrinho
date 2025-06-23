@@ -1,16 +1,30 @@
 import 'package:flutter/material.dart';
-import 'menu_participante.dart';
 
 class MenuDetalhesMeuEvento extends StatelessWidget {
   final String titulo;
   final String descricao;
   final double preco;
+  final String nomeOrador;
+  final String dataInicio;
+  final String dataFim;
+  final String local;
+  final String categoria;
+  final int? limiteInscricoes;
+  final double mediaAvaliacoes;
 
   const MenuDetalhesMeuEvento({
     super.key,
     required this.titulo,
     required this.descricao,
     required this.preco,
+    required this.nomeOrador,
+    required this.dataInicio,
+    required this.dataFim,
+    required this.local,
+    required this.categoria,
+    required this.limiteInscricoes,
+    required this.mediaAvaliacoes,
+
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -18,9 +32,12 @@ class MenuDetalhesMeuEvento extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final localFinal = local.isEmpty ? 'Sem Localização' : local;
+    final categoriaFinal = categoria.isEmpty ? 'Sem Categoria' : categoria;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Detalhes do Meu Evento'),
+        title: const Text('Detalhes do Evento'),
         backgroundColor: verdeEscuro,
       ),
       backgroundColor: Colors.white,
@@ -41,37 +58,32 @@ class MenuDetalhesMeuEvento extends StatelessWidget {
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-              Text(descricao),
+              Text('Categoria: $categoriaFinal'),
+              const SizedBox(height: 8),
+              Text('Descrição: $descricao'),
+              const SizedBox(height: 8),
+              Text('Orador: $nomeOrador'),
+              Text('Início: $dataInicio'),
+              Text('Fim: $dataFim'),
+              Text('Localização: $localFinal'),
+              Text('Média avaliações: ${mediaAvaliacoes.toStringAsFixed(1)}'),
+              Text('Limite Inscrições: ${limiteInscricoes ?? 'Ilimitado'}'),
               const SizedBox(height: 12),
               Text(
-                preco == 0
-                    ? 'Evento Grátis'
-                    : 'Preço: ${preco.toStringAsFixed(2)} €',
+                preco == 0 ? 'Evento Grátis' : 'Preço: ${preco.toStringAsFixed(2)} €',
                 style: const TextStyle(fontStyle: FontStyle.italic),
               ),
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Inscrição cancelada com sucesso!'),
-                    ),
-                  );
-
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => const MenuParticipante(),
-                    ),
-                        (route) => false,
-                  );
+                  Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red[700],
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
-                child: const Text('Cancelar inscrição'),
+                child: const Text('Voltar'),
               ),
             ],
           ),
@@ -80,4 +92,3 @@ class MenuDetalhesMeuEvento extends StatelessWidget {
     );
   }
 }
-

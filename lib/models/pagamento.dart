@@ -1,20 +1,20 @@
 class Pagamento {
-  final int idPagamento;
-  final String dataPagamento;
-  final int idBilhete;
-  final int idMetodo;
+  int? idPagamento;
+  DateTime dataPagamento;
+  int idBilhete;
+  int idMetodo;
 
   Pagamento({
-    required this.idPagamento,
+    this.idPagamento,
     required this.dataPagamento,
     required this.idBilhete,
     required this.idMetodo,
   });
-//kajwsfgklsdehnfçalsdhflçaasfsdfasdfas
+
   factory Pagamento.fromJson(Map<String, dynamic> json) {
     return Pagamento(
       idPagamento: json['id_pagamento'],
-      dataPagamento: json['data_pagamento'],
+      dataPagamento: DateTime.parse(json['data_pagamento']),
       idBilhete: json['id_bilhete'],
       idMetodo: json['id_metodo'],
     );
@@ -22,8 +22,7 @@ class Pagamento {
 
   Map<String, dynamic> toJson() {
     return {
-      'id_pagamento': idPagamento,
-      'data_pagamento': dataPagamento,
+      'data_pagamento': dataPagamento.toIso8601String(),
       'id_bilhete': idBilhete,
       'id_metodo': idMetodo,
     };

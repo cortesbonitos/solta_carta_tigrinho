@@ -30,16 +30,17 @@ class Evento {
       idEvento: json['id_evento'],
       titulo: json['titulo'],
       descricao: json['descricao'],
-      localizacao: json['localizacao'],
+      localizacao: (json['localizacao'] ?? 'Sem Localização') as String,
       dataInicio: DateTime.parse(json['data_inicio']),
       dataFim: DateTime.parse(json['data_fim']),
       mediaAvaliacoes: (json['media_avaliacoes'] ?? 0).toDouble(),
       limiteInscricoes: json['limite_inscricoes'],
-      categoria: json['categoria'] ?? 'Sem Categoria',
-      nomeOrador: json['nome_orador'],
+      categoria: (json['categoria'] ?? 'Sem Categoria') as String,
+      nomeOrador: (json['nome_orador'] ?? 'Sem Orador') as String,
       preco: (json['preco'] ?? 0).toDouble(),
     );
   }
+
 
   Map<String, dynamic> toJson() {
     return {

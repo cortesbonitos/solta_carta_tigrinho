@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/data/avaliacoesAPI.dart';
 import 'package:ipca_gestao_eventos/data/utilizadorAPI.dart';
+import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/models/avaliacao.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
+import 'package:ipca_gestao_eventos/models/inscricao.dart';
 import 'menu_detalhes_evento.dart';
 
 class MenuEventosParticipante extends StatefulWidget {
@@ -46,9 +48,13 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
     try {
       final eventos = await EventosApi.getEventos();
       final avaliacoes = await AvaliacoesAPI.getAvaliacoes();
+      final inscricoes = await InscricoesAPI.getInscricoesPorUser(Utilizador.currentUser!.idUtilizador);
+      final idsInscritos = inscricoes.map((i) => i.idEvento).toSet();
 
       final agora = DateTime.now();
       for (var e in eventos) {
+        if (idsInscritos.contains(e.idEvento)) continue; // Pular eventos em que já está inscrito
+
         if (e.dataFim.isAfter(agora)) {
           _eventosAtivos.add(e);
         } else {
@@ -85,10 +91,16 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
           idEvento: evento.idEvento,
-          categoria: evento.categoria, localizacao: '', // CORRIGIDO AQUI!
+          categoria: evento.categoria,
+          localizacao: evento.localizacao,
         ),
       ),
-    );
+    ).then((_) {
+      // Ao voltar dos detalhes, recarrega a lista
+      _eventosAtivos.clear();
+      _eventosExpirados.clear();
+      _carregarTudo();
+    });
   }
 
   Widget _construirSecao(String titulo, List<Evento> eventos, {bool expirado = false}) {
@@ -165,8 +177,8 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
                           ],
                         ),
                       );
-                    })
-                  ]
+                    }),
+                  ],
                 ],
               ),
             ),

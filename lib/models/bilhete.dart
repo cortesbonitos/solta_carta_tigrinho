@@ -1,35 +1,32 @@
 class Bilhete {
-  final int id;
+  final int? idBilhete;
+  final int idInscricao;
   final int idEvento;
-  final int idUtilizador;
-  final String codigo;
-  final String dataCriacao;
+  final String qrCode;
 
   Bilhete({
-    required this.id,
+    this.idBilhete,
+    required this.idInscricao,
     required this.idEvento,
-    required this.idUtilizador,
-    required this.codigo,
-    required this.dataCriacao,
+    required this.qrCode,
   });
 
   factory Bilhete.fromJson(Map<String, dynamic> json) {
     return Bilhete(
-      id: json['id'],
-      idEvento: json['idEvento'],
-      idUtilizador: json['idUtilizador'],
-      codigo: json['codigo'],
-      dataCriacao: json['dataCriacao'],
+      idBilhete: json['id_bilhete'],
+      idInscricao: json['id_inscricao'],
+      idEvento: json['id_evento'],
+      qrCode: json['qr_code'],
     );
   }
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
-      'idEvento': idEvento,
-      'idUtilizador': idUtilizador,
-      'codigo': codigo,
-      'dataCriacao': dataCriacao,
+      'id_bilhete': idBilhete,
+      'id_inscricao': idInscricao,
+      'id_evento': idEvento,
+      'qr_code': qrCode,
     };
   }
 }
+

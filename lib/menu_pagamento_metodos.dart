@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
-import 'menu_participante.dart';
 import 'menu_pagamento_paypal.dart';
 
 class MenuPagamentoMetodos extends StatefulWidget {
   final String titulo;
   final double preco;
+  final int idEvento;
 
   const MenuPagamentoMetodos({
     super.key,
     required this.titulo,
     required this.preco,
+    required this.idEvento,
   });
 
   @override
@@ -22,7 +23,7 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  final List<String> metodos = ['PayPal']; // Apenas PayPal
+  final List<String> metodos = ['PayPal']; // Apenas PayPal disponível
 
   void _confirmarPagamento() {
     if (metodoSelecionado == null) {
@@ -32,13 +33,14 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
       return;
     }
 
-    // Ir diretamente para o MenuPagamentoPaypal
+    // Avançar para ecrã de pagamento (login PayPal simulado)
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => MenuPagamentoPaypal(
           titulo: widget.titulo,
           preco: widget.preco,
+          idEvento: widget.idEvento,
         ),
       ),
     );
@@ -72,16 +74,18 @@ class _MenuPagamentoMetodosState extends State<MenuPagamentoMetodos> {
               const SizedBox(height: 24),
               const Text('Selecione um método de pagamento:'),
               const SizedBox(height: 12),
-              RadioListTile(
-                title: const Text('PayPal'),
-                value: 'PayPal',
-                groupValue: metodoSelecionado,
-                onChanged: (value) {
-                  setState(() {
-                    metodoSelecionado = value;
-                  });
-                },
-              ),
+              ...metodos.map((metodo) {
+                return RadioListTile(
+                  title: Text(metodo),
+                  value: metodo,
+                  groupValue: metodoSelecionado,
+                  onChanged: (value) {
+                    setState(() {
+                      metodoSelecionado = value;
+                    });
+                  },
+                );
+              }).toList(),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: _confirmarPagamento,

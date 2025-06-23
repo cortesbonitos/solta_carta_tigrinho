@@ -11,9 +11,9 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
   final String dataFim;
   final double? mediaAvaliacoes;
   final int? limiteInscricoes;
-  final String Categoria;
+  final String categoria;
   final String nomeOrador;
-  final String local; // <-- Adicionado
+  final String local;
 
   const MenuDetalhesEventoAdmin({
     super.key,
@@ -25,9 +25,9 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
     required this.dataFim,
     required this.mediaAvaliacoes,
     required this.limiteInscricoes,
-    required this.Categoria,
+    required this.categoria,
     required this.nomeOrador,
-    required this.local, // <-- Adicionado
+    required this.local,
   });
 
   static const Color verdeEscuro = Color(0xFF1a4d3d);
@@ -73,6 +73,9 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final categoriaFinal = categoria.trim().isEmpty ? 'Sem Categoria' : categoria;
+    final localFinal = local.trim().isEmpty ? 'Sem Localização' : local;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Detalhes do Evento'),
@@ -98,14 +101,16 @@ class MenuDetalhesEventoAdmin extends StatelessWidget {
               const SizedBox(height: 12),
               Text(descricao),
               const SizedBox(height: 8),
-              Text(preco == 0 ? 'Evento Grátis' : 'Preço: ${preco.toStringAsFixed(2)} €'),
+              Text(preco == 0
+                  ? 'Evento Grátis'
+                  : 'Preço: ${preco.toStringAsFixed(2)} €'),
               const SizedBox(height: 8),
               Text('Início: $dataInicio'),
               Text('Fim: $dataFim'),
               const SizedBox(height: 8),
               Text('Orador: $nomeOrador'),
-              Text('Categoria: $Categoria'),
-              Text('Localização: $local'), // <-- Adicionado
+              Text('Categoria: $categoriaFinal'),
+              Text('Localização: $localFinal'),
               Text('Limite de Inscrições: ${limiteInscricoes ?? 'Ilimitado'}'),
               Text('Média Avaliações: ${mediaAvaliacoes?.toStringAsFixed(1) ?? 'Sem avaliações'}'),
               const SizedBox(height: 24),

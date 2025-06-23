@@ -4,7 +4,7 @@ import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/models/inscricao.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
-import 'menu_detalhes_meu_evento.dart';
+import 'menu_detalhes_meu_evento.dart' hide MenuDetalhesEvento;
 import 'menu_avaliacao.dart';
 import 'menu_detalhes_evento.dart';
 

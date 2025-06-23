@@ -62,12 +62,14 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
           dataFim: evento.dataFim.toIso8601String(),
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          Categoria: evento.categoria,
-          nomeOrador: evento.nomeOrador, local: '',
+          categoria: evento.categoria,
+          nomeOrador: evento.nomeOrador,
+          local: evento.localizacao, // <-- CORRETO AGORA
         ),
       ),
     ).then((_) => _carregarEventos());
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -125,7 +127,8 @@ class _MenuEventosAdminState extends State<MenuEventosAdmin> {
                     evento.preco == 0
                         ? 'Grátis'
                         : 'Preço: ${evento.preco.toStringAsFixed(2)} €',
-                    style: const TextStyle(fontStyle: FontStyle.italic),
+                    style: const TextStyle(
+                        fontStyle: FontStyle.italic),
                   ),
                 ],
               ),

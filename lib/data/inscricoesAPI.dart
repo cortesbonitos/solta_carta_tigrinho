@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:core';
 
 import 'package:ipca_gestao_eventos/models/inscricao.dart';
+import 'package:ipca_gestao_eventos/models/bilhete.dart';
 
 abstract class InscricoesAPI {
   static const String _baseUrl = 'https://ipcaeventos-cmh2evayfvghhce9.spaincentral-01.azurewebsites.net/api';
@@ -21,9 +22,7 @@ abstract class InscricoesAPI {
         final List<dynamic> responseData = jsonDecode(response.body);
         List<Inscricao> inscricoes =
         responseData.map((json) => Inscricao.fromJson(json)).toList();
-        return inscricoes
-            .where((i) => i.idUtilizador == idUtilizador)
-            .toList();
+        return inscricoes.where((i) => i.idUtilizador == idUtilizador).toList();
       } else {
         throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
       }
@@ -47,9 +46,7 @@ abstract class InscricoesAPI {
         final List<dynamic> responseData = jsonDecode(response.body);
         List<Inscricao> inscricoes =
         responseData.map((json) => Inscricao.fromJson(json)).toList();
-        return inscricoes
-            .where((i) => i.idEvento == idEvento)
-            .toList();
+        return inscricoes.where((i) => i.idEvento == idEvento).toList();
       } else {
         throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
       }
@@ -88,8 +85,29 @@ abstract class InscricoesAPI {
     );
 
     if (response.statusCode != 201 && response.statusCode != 200) {
-      print(response.body);
       throw Exception('Erro ao criar inscrição: ${response.body}');
+    }
+  }
+
+  /// Obtém os bilhetes de um utilizador.
+  static Future<List<Bilhete>> getBilhetesPorUser(int idUtilizador) async {
+    final url = Uri.parse('$_baseUrl/bilhete/utilizador/$idUtilizador');
+
+    try {
+      final response = await http.get(
+        url,
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> responseData = jsonDecode(response.body);
+        return responseData.map((json) => Bilhete.fromJson(json)).toList();
+      } else {
+        throw Exception('Erro ${response.statusCode}: ${response.reasonPhrase}');
+      }
+    } catch (e) {
+      print('Erro ao buscar bilhetes: $e');
+      rethrow;
     }
   }
 }

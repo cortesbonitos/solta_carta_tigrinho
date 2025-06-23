@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
-import 'package:ipca_gestao_eventos/models/utilizador.dart';
 
 class MenuCriarEvento extends StatefulWidget {
   const MenuCriarEvento({super.key});
@@ -60,13 +59,26 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
   }
 
   void _criarEvento() async {
+    if (_tituloController.text.isEmpty ||
+        _descricaoController.text.isEmpty ||
+        _nomeOradorController.text.isEmpty ||
+        _categoriaController.text.isEmpty ||
+        _localController.text.isEmpty ||
+        _dataInicio == null ||
+        _dataFim == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Preencha todos os campos obrigatórios!')),
+      );
+      return;
+    }
+
     final novoEvento = Evento(
       idEvento: 0,
       titulo: _tituloController.text,
       descricao: _descricaoController.text,
       preco: double.tryParse(_precoController.text) ?? 0.0,
-      dataInicio: _dataInicio ?? DateTime.now(),
-      dataFim: _dataFim ?? DateTime.now(),
+      dataInicio: _dataInicio!,
+      dataFim: _dataFim!,
       mediaAvaliacoes: 0,
       limiteInscricoes: int.tryParse(_limiteInscricoesController.text),
       nomeOrador: _nomeOradorController.text,
@@ -79,6 +91,9 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
       Navigator.pop(context);
     } catch (e) {
       print('Erro ao criar evento: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Erro ao criar evento')),
+      );
     }
   }
 
@@ -96,11 +111,11 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
           children: [
             TextField(
               controller: _tituloController,
-              decoration: const InputDecoration(labelText: 'Título'),
+              decoration: const InputDecoration(labelText: 'Título *'),
             ),
             TextField(
               controller: _descricaoController,
-              decoration: const InputDecoration(labelText: 'Descrição'),
+              decoration: const InputDecoration(labelText: 'Descrição *'),
             ),
             TextField(
               controller: _precoController,
@@ -109,7 +124,7 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
             ),
             TextField(
               controller: _nomeOradorController,
-              decoration: const InputDecoration(labelText: 'Nome do Orador'),
+              decoration: const InputDecoration(labelText: 'Nome do Orador *'),
             ),
             TextField(
               controller: _limiteInscricoesController,
@@ -118,23 +133,23 @@ class _MenuCriarEventoState extends State<MenuCriarEvento> {
             ),
             TextField(
               controller: _categoriaController,
-              decoration: const InputDecoration(labelText: 'Categoria'),
+              decoration: const InputDecoration(labelText: 'Categoria *'),
             ),
             TextField(
               controller: _localController,
-              decoration: const InputDecoration(labelText: 'Localização'),
+              decoration: const InputDecoration(labelText: 'Localização *'),
             ),
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: () => _selecionarDataHora(context, true),
               child: Text(_dataInicio == null
-                  ? 'Selecionar Data e Hora de Início'
+                  ? 'Selecionar Data e Hora de Início *'
                   : 'Início: ${_dataInicio!.toString()}'),
             ),
             ElevatedButton(
               onPressed: () => _selecionarDataHora(context, false),
               child: Text(_dataFim == null
-                  ? 'Selecionar Data e Hora de Fim'
+                  ? 'Selecionar Data e Hora de Fim *'
                   : 'Fim: ${_dataFim!.toString()}'),
             ),
             const SizedBox(height: 20),
