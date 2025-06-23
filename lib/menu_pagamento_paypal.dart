@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
-import 'package:ipca_gestao_eventos/models/pagamento.dart';
-import 'package:ipca_gestao_eventos/data/pagamentoAPI.dart';
 import 'menu_participante.dart';
 import 'package:ipca_gestao_eventos/models/inscricao.dart';
-import 'package:ipca_gestao_eventos/models/bilhete.dart';
 
 class MenuPagamentoPaypal extends StatefulWidget {
   final String titulo;
@@ -30,7 +27,7 @@ class _MenuPagamentoPaypalState extends State<MenuPagamentoPaypal> {
   static const Color verdeEscuro = Color(0xFF1a4d3d);
   static const Color verdeClaro = Color(0xFFA8D4BA);
 
-  void _confirmarPagamento() async {
+  void _confirmarInscricao() async {
     if (emailController.text.isEmpty || passwordController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Preencha todos os campos.')),
@@ -42,7 +39,6 @@ class _MenuPagamentoPaypalState extends State<MenuPagamentoPaypal> {
     final dataInscricao = DateTime.now();
 
     try {
-      // 1. Criar inscrição
       await InscricoesAPI.criarInscricao(
         Inscricao(
           id_inscricao: 0,
@@ -52,49 +48,8 @@ class _MenuPagamentoPaypalState extends State<MenuPagamentoPaypal> {
         ),
       );
 
-      // 2. Tentar buscar o bilhete (até 5 vezes, com delay)
-      Bilhete? bilhete;
-      const maxTentativas = 5;
-
-      for (int tentativa = 0; tentativa < maxTentativas; tentativa++) {
-        try {
-          final bilhetes = await InscricoesAPI.getBilhetesPorUser(idUtilizador);
-          bilhete = bilhetes.firstWhere(
-                (b) => b.idEvento == widget.idEvento,
-            orElse: () => throw Exception(),
-          );
-          break;
-        } catch (_) {
-          await Future.delayed(const Duration(seconds: 1));
-        }
-      }
-
-      if (bilhete == null || bilhete.idBilhete == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Bilhete não encontrado após várias tentativas.')),
-        );
-        return;
-      }
-
-      // 3. Criar pagamento com o bilhete
-      final pagamento = Pagamento(
-        dataPagamento: DateTime.now(),
-        idBilhete: bilhete.idBilhete!,
-        idMetodo: 1, // PayPal
-      );
-
-      final sucesso = await PagamentoAPI.criarPagamento(pagamento);
-
-      if (!sucesso) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao registar pagamento.')),
-        );
-        return;
-      }
-
-      // 4. Sucesso total
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Pagamento e inscrição concluídos com sucesso!')),
+        const SnackBar(content: Text('Inscrição concluída com sucesso!')),
       );
 
       Navigator.pushAndRemoveUntil(
@@ -104,7 +59,7 @@ class _MenuPagamentoPaypalState extends State<MenuPagamentoPaypal> {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e')),
+        SnackBar(content: Text('Erro ao inscrever: $e')),
       );
     }
   }
@@ -162,7 +117,7 @@ class _MenuPagamentoPaypalState extends State<MenuPagamentoPaypal> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _confirmarPagamento,
+                onPressed: _confirmarInscricao,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: verdeEscuro,
                   foregroundColor: Colors.white,

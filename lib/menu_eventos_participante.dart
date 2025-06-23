@@ -163,12 +163,14 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
                     const SizedBox(height: 8),
                     ...avaliacoes.map((a) {
                       final user = Utilizador.utilizadores[a.idUtilizador];
+                      final nome = user?.nome ?? 'Utilizador #${a.idUtilizador}';
                       return Padding(
-                        padding: const EdgeInsets.only(bottom: 8.0),
+                        padding: const EdgeInsets.only(bottom: 12.0),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(user?.nome ?? 'Utilizador #${a.idUtilizador}'),
+                            Text(nome, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            const SizedBox(height: 4),
                             Row(
                               children: List.generate(5, (i) => Icon(
                                 i < a.pontuacao ? Icons.star : Icons.star_border,
@@ -176,8 +178,11 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
                                 size: 18,
                               )),
                             ),
-                            if (a.comentario != null && a.comentario!.isNotEmpty)
-                              Text('"${a.comentario!}"'),
+                            if (a.comentario != null && a.comentario!.trim().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4.0),
+                                child: Text('"${a.comentario!}"'),
+                              ),
                           ],
                         ),
                       );

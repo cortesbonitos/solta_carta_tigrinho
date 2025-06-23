@@ -15,7 +15,7 @@ class AvaliacoesAPI {
       "id_evento": idEvento,
       "id_utilizador": idUtilizador,
       "pontuacao": nota,
-      "comentario": comentario ?? "",
+      "comentario": comentario?.isNotEmpty == true ? comentario : " ",
     };
 
     try {
