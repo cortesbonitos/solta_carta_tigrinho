@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
+import 'package:ipca_gestao_eventos/data/filaEsperaAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/models/inscricao.dart';
+import 'package:ipca_gestao_eventos/models/filaEspera.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
-import 'menu_detalhes_meu_evento.dart' hide MenuDetalhesEvento;
 import 'menu_avaliacao.dart';
 import 'menu_detalhes_evento.dart';
-
 
 class MenuListaMeusEventos extends StatefulWidget {
   const MenuListaMeusEventos({super.key});
@@ -23,7 +23,9 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
 
   List<Evento> _eventosFuturos = [];
   List<Evento> _eventosPassados = [];
+  List<Evento> _eventosLotacaoMaxima = [];
   List<Inscricao> _inscricoes = [];
+  List<FilaEspera> _filaEspera = [];
   bool _loading = true;
   String? _erro;
 
@@ -35,9 +37,14 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
 
   Future<void> _carregarEventosInscritos() async {
     try {
+      // Buscar inscrições e eventos onde está na fila de espera
       _inscricoes = await InscricoesAPI.getInscricoesPorUser(idUtilizador);
-      final idsEventosInscritos = _inscricoes.map((i) => i.idEvento).toList();
+      _filaEspera = await FilaEsperaAPI.getFilaPorUtilizador(idUtilizador);
 
+      final idsEventosInscritos = _inscricoes.map((i) => i.idEvento).toList();
+      final idsEventosFila = _filaEspera.map((f) => f.idEvento).toSet();
+
+      // Buscar os eventos de inscrição
       final eventosListas = await Future.wait(
         idsEventosInscritos.map((id) async {
           try {
@@ -47,12 +54,25 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           }
         }),
       );
+      final eventosInscrito = eventosListas.whereType<Evento>().toList();
 
-      final eventos = eventosListas.whereType<Evento>().toList();
+      // Buscar os eventos da fila de espera
+      final eventosFilaListas = await Future.wait(
+        idsEventosFila.map((id) async {
+          try {
+            return await EventosApi.getEventoPorId(id);
+          } catch (_) {
+            return null;
+          }
+        }),
+      );
+      final eventosFila = eventosFilaListas.whereType<Evento>().toList();
+
       final agora = DateTime.now();
 
-      _eventosFuturos = eventos.where((e) => e.dataFim.isAfter(agora)).toList();
-      _eventosPassados = eventos.where((e) => e.dataFim.isBefore(agora)).toList();
+      _eventosFuturos = eventosInscrito.where((e) => e.dataFim.isAfter(agora)).toList();
+      _eventosPassados = eventosInscrito.where((e) => e.dataFim.isBefore(agora)).toList();
+      _eventosLotacaoMaxima = eventosFila;
 
       setState(() => _loading = false);
     } catch (e) {
@@ -62,8 +82,6 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
       });
     }
   }
-
-
 
   Future<void> _desinscrever(BuildContext context, Evento evento) async {
     try {
@@ -100,12 +118,13 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           dataFim: evento.dataFim,
           mediaAvaliacoes: evento.mediaAvaliacoes,
           limiteInscricoes: evento.limiteInscricoes,
-          categoria: evento.categoria, localizacao: '',
+          categoria: evento.categoria,
+          localizacao: evento.localizacao ?? '',
+          jaInscrito: true,
         ),
       ),
     );
   }
-
 
   void _avaliarEvento(BuildContext context, Evento evento) {
     Navigator.push(
@@ -119,8 +138,7 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
     );
   }
 
-
-  Widget _construirCartao(Evento evento, {required bool podeCancelar}) {
+  Widget _construirCartao(Evento evento, {required bool podeCancelar, bool filaEspera = false}) {
     return GestureDetector(
       onTap: () => _abrirDetalhes(context, evento),
       child: Container(
@@ -142,7 +160,7 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           children: [
             Row(
               children: [
-                const Icon(Icons.event_available),
+                Icon(filaEspera ? Icons.hourglass_empty : Icons.event_available),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
@@ -165,21 +183,32 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
               style: const TextStyle(fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                ElevatedButton(
-                  onPressed: () => podeCancelar
-                      ? _desinscrever(context, evento)
-                      : _avaliarEvento(context, evento),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: podeCancelar ? Colors.red[700] : verdeEscuro,
-                    foregroundColor: Colors.white,
+            if (!filaEspera)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  ElevatedButton(
+                    onPressed: () => podeCancelar
+                        ? _desinscrever(context, evento)
+                        : _avaliarEvento(context, evento),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: podeCancelar ? Colors.red[700] : verdeEscuro,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(podeCancelar ? 'Cancelar inscrição' : 'Avaliar'),
                   ),
-                  child: Text(podeCancelar ? 'Cancelar inscrição' : 'Avaliar'),
-                ),
-              ],
-            ),
+                ],
+              )
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: const [
+                  Text(
+                    'Em Fila de Espera',
+                    style: TextStyle(fontStyle: FontStyle.italic, color: Colors.orange),
+                  ),
+                ],
+              ),
           ],
         ),
       ),
@@ -198,20 +227,22 @@ class _MenuListaMeusEventosState extends State<MenuListaMeusEventos> {
           ? const Center(child: CircularProgressIndicator())
           : _erro != null
           ? Center(child: Text('Erro: $_erro'))
-          : (_eventosFuturos.isEmpty && _eventosPassados.isEmpty)
-          ? const Center(child: Text('Nenhuma inscrição encontrada.'))
           : ListView(
         padding: const EdgeInsets.all(16),
         children: [
           if (_eventosFuturos.isNotEmpty)
             const Text('Eventos Futuros', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          ..._eventosFuturos.map((e) => _construirCartao(e, podeCancelar: true)).toList(),
-          const SizedBox(height: 20),
-          if (_eventosPassados.isNotEmpty)
+          ..._eventosFuturos.map((e) => _construirCartao(e, podeCancelar: true)),
+          if (_eventosPassados.isNotEmpty) ...[
+            const SizedBox(height: 20),
             const Text('Eventos Passados', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          ..._eventosPassados.map((e) => _construirCartao(e, podeCancelar: false)).toList(),
+            ..._eventosPassados.map((e) => _construirCartao(e, podeCancelar: false)),
+          ],
+          if (_eventosLotacaoMaxima.isNotEmpty) ...[
+            const SizedBox(height: 20),
+            const Text('Eventos com Lotação Máxima Alcançada', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange)),
+            ..._eventosLotacaoMaxima.map((e) => _construirCartao(e, podeCancelar: false, filaEspera: true)),
+          ],
         ],
       ),
     );

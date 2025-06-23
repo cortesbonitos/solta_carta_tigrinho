@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'menu_login.dart';
-import 'menu_eventos_participante.dart';
-import 'menu_lista_meus_eventos.dart';
+
 import 'menu_bilhetes.dart';
+import 'menu_eventos_participante.dart' show MenuEventosParticipante;
+import 'menu_lista_meus_eventos.dart' show MenuListaMeusEventos;
 
 class MenuParticipante extends StatelessWidget {
   const MenuParticipante({super.key});
@@ -15,7 +16,6 @@ class MenuParticipante extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // BARRA VERDE
           Container(
             height: 80,
             width: double.infinity,
@@ -31,8 +31,6 @@ class MenuParticipante extends StatelessWidget {
               ),
             ),
           ),
-
-          // CAIXA DE BOTÕES
           Expanded(
             child: Center(
               child: Container(

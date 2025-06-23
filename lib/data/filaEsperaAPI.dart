@@ -32,4 +32,18 @@ class FilaEsperaAPI {
       throw Exception("Erro ao buscar fila de espera");
     }
   }
+
+  static Future<List<FilaEspera>> getFilaPorUtilizador(int idUtilizador) async {
+    final response = await http.get(Uri.parse(_baseUrl));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = jsonDecode(response.body);
+      return jsonList
+          .map((json) => FilaEspera.fromJson(json))
+          .where((f) => f.idUtilizador == idUtilizador)
+          .toList();
+    } else {
+      throw Exception("Erro ao buscar fila de espera por utilizador");
+    }
+  }
 }

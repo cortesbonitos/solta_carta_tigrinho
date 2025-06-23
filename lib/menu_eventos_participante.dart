@@ -3,10 +3,10 @@ import 'package:ipca_gestao_eventos/data/eventosAPI.dart';
 import 'package:ipca_gestao_eventos/data/avaliacoesAPI.dart';
 import 'package:ipca_gestao_eventos/data/utilizadorAPI.dart';
 import 'package:ipca_gestao_eventos/data/inscricoesAPI.dart';
+import 'package:ipca_gestao_eventos/data/filaEsperaAPI.dart';
 import 'package:ipca_gestao_eventos/models/eventos.dart';
 import 'package:ipca_gestao_eventos/models/avaliacao.dart';
 import 'package:ipca_gestao_eventos/models/utilizador.dart';
-import 'package:ipca_gestao_eventos/models/inscricao.dart';
 import 'menu_detalhes_evento.dart';
 
 class MenuEventosParticipante extends StatefulWidget {
@@ -49,11 +49,16 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
       final eventos = await EventosApi.getEventos();
       final avaliacoes = await AvaliacoesAPI.getAvaliacoes();
       final inscricoes = await InscricoesAPI.getInscricoesPorUser(Utilizador.currentUser!.idUtilizador);
+      final filaEspera = await FilaEsperaAPI.getFilaPorUtilizador(Utilizador.currentUser!.idUtilizador);
+
       final idsInscritos = inscricoes.map((i) => i.idEvento).toSet();
+      final idsFila = filaEspera.map((f) => f.idEvento).toSet();
 
       final agora = DateTime.now();
+
       for (var e in eventos) {
-        if (idsInscritos.contains(e.idEvento)) continue; // Pular eventos em que já está inscrito
+        if (idsInscritos.contains(e.idEvento)) continue;
+        if (idsFila.contains(e.idEvento)) continue;
 
         if (e.dataFim.isAfter(agora)) {
           _eventosAtivos.add(e);
@@ -96,7 +101,6 @@ class _MenuEventosParticipanteState extends State<MenuEventosParticipante> {
         ),
       ),
     ).then((_) {
-      // Ao voltar dos detalhes, recarrega a lista
       _eventosAtivos.clear();
       _eventosExpirados.clear();
       _carregarTudo();

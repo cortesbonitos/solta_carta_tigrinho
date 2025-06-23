@@ -3,8 +3,6 @@
   import 'package:ipca_gestao_eventos/models/inscricao.dart';
   import 'package:ipca_gestao_eventos/models/utilizador.dart';
   import 'package:ipca_gestao_eventos/models/pagamento.dart';
-  import 'package:ipca_gestao_eventos/api/pagamento_api.dart'; // ou outro caminho correto
-  import 'package:ipca_gestao_eventos/models/bilhete.dart';
   import 'menu_participante.dart';
   import 'package:ipca_gestao_eventos/data/pagamentoAPI.dart'; // ✅ CERTO
 
