@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'menu_eventos_admin.dart';
 import 'menu_login.dart';
+import 'menu_estatistica.dart';
 
 class MenuAdmin extends StatelessWidget {
   const MenuAdmin({super.key});
@@ -55,6 +56,23 @@ class MenuAdmin extends StatelessWidget {
                       ),
                       child: const Text('Listar Evento'),
                     ),
+                    const SizedBox(height: 20),
+
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MenuEstatistica()),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: verdeEscuro,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+                      ),
+                      child: const Text('Estatística'),
+                    ),
+
                     const SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
