@@ -34,7 +34,6 @@ class AvaliacoesAPI {
     }
   }
 
-  // 🔧 ESTE MÉTODO NOVO
   static Future<List<Avaliacao>> getAvaliacoes() async {
     try {
       final response = await http.get(

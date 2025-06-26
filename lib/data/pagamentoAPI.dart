@@ -16,7 +16,6 @@ class PagamentoAPI {
         body: jsonEncode(pagamento.toJson()),
       );
 
-      // 🟡 ADICIONA ISTO AQUI:
       print('STATUS: ${response.statusCode}');
       print('BODY: ${response.body}');
 
